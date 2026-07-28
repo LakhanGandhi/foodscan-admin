@@ -1,17 +1,13 @@
 import { useAuth } from "../auth/AuthContext";
 
 function DashboardPage() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   return (
-    <div style={{ fontFamily: "system-ui, sans-serif", padding: 40 }}>
-      <h1>FoodCheck Admin</h1>
-      <p>
-        Logged in as <b>{user.name}</b> ({user.role})
-      </p>
-      <button onClick={logout} style={{ padding: "8px 16px" }}>
-        Log out
-      </button>
+    <div>
+      <h2>Welcome, {user.name}</h2>
+      <p>Role: {user.role}</p>
+      <p>Use the sidebar to manage companies, plants, products, employees, and view analytics.</p>
     </div>
   );
 }
