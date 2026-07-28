@@ -1,12 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 
 function LoginPage() {
-  const { login } = useAuth();
+  const { user, login } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // If already logged in (e.g. navigated back to /login manually), leave immediately.
+  useEffect(() => {
+    if (user) navigate("/dashboard", { replace: true });
+  }, [user, navigate]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -14,6 +21,7 @@ function LoginPage() {
     setSubmitting(true);
     try {
       await login(email, password);
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       setError(err.response?.data?.error?.message || "Login failed.");
     } finally {
