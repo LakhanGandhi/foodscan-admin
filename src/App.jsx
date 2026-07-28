@@ -1,34 +1,24 @@
-import { AuthProvider, useAuth } from "./auth/AuthContext";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./auth/AuthContext";
+import ProtectedRoute from "./routes/ProtectedRoute";
 import LoginPage from "./pages/auth/LoginPage";
-
-function AppShell() {
-  const { user, loading, logout } = useAuth();
-
-  if (loading) {
-    return <p style={{ fontFamily: "system-ui, sans-serif", padding: 40 }}>Loading...</p>;
-  }
-
-  if (!user) {
-    return <LoginPage />;
-  }
-
-  return (
-    <div style={{ fontFamily: "system-ui, sans-serif", padding: 40 }}>
-      <h1>FoodCheck Admin</h1>
-      <p>
-        Logged in as <b>{user.name}</b> ({user.role})
-      </p>
-      <button onClick={logout} style={{ padding: "8px 16px" }}>
-        Log out
-      </button>
-    </div>
-  );
-}
+import DashboardPage from "./pages/DashboardPage";
 
 function App() {
   return (
     <AuthProvider>
-      <AppShell />
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
     </AuthProvider>
   );
 }
