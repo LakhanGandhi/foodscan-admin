@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
+import "./LoginPage.css";
 
 function LoginPage() {
   const { user, login } = useAuth();
@@ -10,7 +11,6 @@ function LoginPage() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // If already logged in (e.g. navigated back to /login manually), leave immediately.
   useEffect(() => {
     if (user) navigate("/dashboard", { replace: true });
   }, [user, navigate]);
@@ -30,30 +30,41 @@ function LoginPage() {
   }
 
   return (
-    <div style={{ maxWidth: 320, margin: "80px auto", fontFamily: "system-ui, sans-serif" }}>
-      <h1 style={{ fontSize: 20 }}>FoodCheck Admin</h1>
-      <form onSubmit={handleSubmit}>
-        <label style={{ display: "block", marginTop: 12, fontSize: 13 }}>Email</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={{ width: "100%", padding: 8 }}
-          required
-        />
-        <label style={{ display: "block", marginTop: 12, fontSize: 13 }}>Password</label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{ width: "100%", padding: 8 }}
-          required
-        />
-        {error && <p style={{ color: "crimson", fontSize: 13 }}>{error}</p>}
-        <button type="submit" disabled={submitting} style={{ marginTop: 16, padding: "8px 16px" }}>
-          {submitting ? "Logging in..." : "Log in"}
-        </button>
-      </form>
+    <div className="login-page">
+      <div className="login-left">
+        <div className="login-tagline">International Product Verification Platform</div>
+        <h1 className="login-logo">Foodscan</h1>
+      </div>
+
+      <div className="login-right">
+        <div className="login-card">
+          <form onSubmit={handleSubmit}>
+            <label className="login-label">Email ID</label>
+            <input
+              className="login-input"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <label className="login-label">Password</label>
+            <input
+              className="login-input"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            {error && <p className="login-error">{error}</p>}
+            <button className="login-button" type="submit" disabled={submitting}>
+              {submitting ? "Logging in..." : "Log In"}
+            </button>
+            <a className="login-forgot" href="#">
+              Forget Password ?
+            </a>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }
