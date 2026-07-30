@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet } from "react-router-dom";
 import { Home, TrendingUp, Building2, Factory, ShoppingCart, Users, ClipboardCheck, UserCircle, ChevronRight, ChevronLeft } from "lucide-react";
-import { useAuth } from "../auth/AuthContext";
 
 const navItems = [
   { to: "/dashboard/home", label: "Home", icon: Home },
@@ -13,16 +12,18 @@ const navItems = [
   { to: "/dashboard/analytics", label: "Analytics", icon: ClipboardCheck },
 ];
 
+const linkStyle = ({ isActive }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: 12,
+  padding: "12px 24px",
+  textDecoration: "none",
+  whiteSpace: "nowrap",
+  color: isActive ? "var(--color-primary)" : "var(--color-text)",
+});
+
 function DashboardLayout() {
-  const { logout } = useAuth();
-  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-
-  async function handleLogout() {
-    await logout();
-    navigate("/logged-out");
-  }
-
   const sidebarWidth = open ? 220 : 72;
 
   return (
@@ -55,7 +56,6 @@ function DashboardLayout() {
             padding: "20px 0",
           }}
         >
-          {/* Toggle button - pinned to the sidebar's edge, fully separate from any other control */}
           <button
             onClick={() => setOpen((prev) => !prev)}
             style={{
@@ -81,45 +81,17 @@ function DashboardLayout() {
 
           <nav style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 12 }}>
             {navItems.map(({ to, label, icon: Icon }) => (
-              <NavLink
-                key={to}
-                to={to}
-                style={({ isActive }) => ({
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12,
-                  padding: "12px 24px",
-                  textDecoration: "none",
-                  whiteSpace: "nowrap",
-                  color: isActive ? "var(--color-primary)" : "var(--color-text)",
-                })}
-              >
+              <NavLink key={to} to={to} style={linkStyle}>
                 <Icon size={22} style={{ flexShrink: 0 }} />
                 {open && <span>{label}</span>}
               </NavLink>
             ))}
           </nav>
 
-          {/* Logout - its own isolated element at the bottom, nothing else nearby */}
-          <button
-            onClick={handleLogout}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-              padding: "12px 24px",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: "var(--color-primary)",
-              width: "100%",
-              whiteSpace: "nowrap",
-            }}
-            title="Log out"
-          >
+          <NavLink to="/dashboard/settings" style={linkStyle}>
             <UserCircle size={22} style={{ flexShrink: 0 }} />
-            {open && <span>Log out</span>}
-          </button>
+            {open && <span>Settings</span>}
+          </NavLink>
         </aside>
 
         <main style={{ flex: 1, padding: 24 }}>

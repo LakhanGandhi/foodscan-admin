@@ -11,6 +11,7 @@ import PlantsPage from "./pages/PlantsPage";
 import ProductsPage from "./pages/ProductsPage";
 import EmployeesPage from "./pages/EmployeesPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
+import UserSettingsPage from "./pages/UserSettingsPage";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
           <Route path="products" element={<ProductsPage />} />
           <Route path="employees" element={<EmployeesPage />} />
           <Route path="analytics" element={<AnalyticsPage />} />
+          <Route path="settings" element={<UserSettingsPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
