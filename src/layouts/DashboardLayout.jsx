@@ -43,6 +43,7 @@ function DashboardLayout() {
       <div style={{ display: "flex" }}>
         <aside
           style={{
+            position: "relative",
             width: sidebarWidth,
             transition: "width 0.15s ease",
             background: "var(--color-bg)",
@@ -54,7 +55,31 @@ function DashboardLayout() {
             padding: "20px 0",
           }}
         >
-          <nav style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          {/* Toggle button - pinned to the sidebar's edge, fully separate from any other control */}
+          <button
+            onClick={() => setOpen((prev) => !prev)}
+            style={{
+              position: "absolute",
+              top: 20,
+              right: -14,
+              border: "1px solid var(--color-primary)",
+              background: "#fff",
+              borderRadius: "50%",
+              width: 28,
+              height: 28,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              color: "var(--color-primary)",
+              zIndex: 2,
+            }}
+            aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
+          >
+            {open ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+          </button>
+
+          <nav style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 12 }}>
             {navItems.map(({ to, label, icon: Icon }) => (
               <NavLink
                 key={to}
@@ -65,54 +90,36 @@ function DashboardLayout() {
                   gap: 12,
                   padding: "12px 24px",
                   textDecoration: "none",
+                  whiteSpace: "nowrap",
                   color: isActive ? "var(--color-primary)" : "var(--color-text)",
                 })}
               >
-                <Icon size={22} />
+                <Icon size={22} style={{ flexShrink: 0 }} />
                 {open && <span>{label}</span>}
               </NavLink>
             ))}
           </nav>
 
-          <div>
-            <button
-              onClick={handleLogout}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                padding: "12px 24px",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: "var(--color-primary)",
-                width: "100%",
-              }}
-              title="Log out"
-            >
-              <UserCircle size={22} />
-              {open && <span>Log out</span>}
-            </button>
-            <div style={{ display: "flex", justifyContent: open ? "flex-end" : "center", padding: "8px 24px" }}>
-              <button
-                onClick={() => setOpen(!open)}
-                style={{
-                  border: "1px solid var(--color-primary)",
-                  background: "#fff",
-                  borderRadius: "50%",
-                  width: 32,
-                  height: 32,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  color: "var(--color-primary)",
-                }}
-              >
-                {open ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
-              </button>
-            </div>
-          </div>
+          {/* Logout - its own isolated element at the bottom, nothing else nearby */}
+          <button
+            onClick={handleLogout}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              padding: "12px 24px",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "var(--color-primary)",
+              width: "100%",
+              whiteSpace: "nowrap",
+            }}
+            title="Log out"
+          >
+            <UserCircle size={22} style={{ flexShrink: 0 }} />
+            {open && <span>Log out</span>}
+          </button>
         </aside>
 
         <main style={{ flex: 1, padding: 24 }}>
