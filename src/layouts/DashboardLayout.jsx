@@ -44,7 +44,6 @@ function DashboardLayout() {
       <div style={{ display: "flex" }}>
         <aside
           style={{
-            position: "relative",
             width: sidebarWidth,
             transition: "width 0.15s ease",
             background: "var(--color-bg)",
@@ -56,30 +55,7 @@ function DashboardLayout() {
             padding: "20px 0",
           }}
         >
-          <button
-            onClick={() => setOpen((prev) => !prev)}
-            style={{
-              position: "absolute",
-              top: 20,
-              right: -14,
-              border: "1px solid var(--color-primary)",
-              background: "#fff",
-              borderRadius: "50%",
-              width: 28,
-              height: 28,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              color: "var(--color-primary)",
-              zIndex: 2,
-            }}
-            aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
-          >
-            {open ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
-          </button>
-
-          <nav style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 12 }}>
+          <nav style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             {navItems.map(({ to, label, icon: Icon }) => (
               <NavLink key={to} to={to} style={linkStyle}>
                 <Icon size={22} style={{ flexShrink: 0 }} />
@@ -88,10 +64,33 @@ function DashboardLayout() {
             ))}
           </nav>
 
-          <NavLink to="/dashboard/settings" style={linkStyle}>
-            <UserCircle size={22} style={{ flexShrink: 0 }} />
-            {open && <span>Settings</span>}
-          </NavLink>
+          <div>
+            <NavLink to="/dashboard/settings" style={linkStyle}>
+              <UserCircle size={22} style={{ flexShrink: 0 }} />
+              {open && <span>Settings</span>}
+            </NavLink>
+
+            <div style={{ display: "flex", justifyContent: open ? "flex-end" : "center", padding: "8px 24px" }}>
+              <button
+                onClick={() => setOpen((prev) => !prev)}
+                style={{
+                  border: "1px solid var(--color-primary)",
+                  background: "#fff",
+                  borderRadius: "50%",
+                  width: 28,
+                  height: 28,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  color: "var(--color-primary)",
+                }}
+                aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
+              >
+                {open ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+              </button>
+            </div>
+          </div>
         </aside>
 
         <main style={{ flex: 1, padding: 24 }}>
