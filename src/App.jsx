@@ -7,6 +7,7 @@ import LoggedOutPage from "./pages/auth/LoggedOutPage";
 import HomePage from "./pages/HomePage";
 import DashboardPage from "./pages/DashboardPage";
 import CompaniesPage from "./pages/CompaniesPage";
+import BrandsPage from "./pages/BrandsPage";
 import PlantsPage from "./pages/PlantsPage";
 import ProductsPage from "./pages/ProductsPage";
 import EmployeesPage from "./pages/EmployeesPage";
@@ -32,6 +33,7 @@ function App() {
           <Route path="home" element={<HomePage />} />
           <Route path="overview" element={<DashboardPage />} />
           <Route path="companies" element={<CompaniesPage />} />
+          <Route path="brands" element={<BrandsPage />} />
           <Route path="plants" element={<PlantsPage />} />
           <Route path="products" element={<ProductsPage />} />
           <Route path="employees" element={<EmployeesPage />} />
