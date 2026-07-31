@@ -6,7 +6,6 @@ import { listCompanies, createCompany, updateCompany, changeCompanyStatus } from
 const emptyForm = {
   companyName: "",
   legalCompanyName: "",
-  brandName: "",
   companyType: "",
   gstNumber: "",
   website: "",
@@ -89,7 +88,6 @@ function CompaniesPage() {
     setEditForm({
       companyName: company.companyName,
       legalCompanyName: company.legalCompanyName,
-      brandName: company.brandName || "",
       companyType: company.companyType,
       website: company.website,
       email: company.email,
@@ -194,8 +192,6 @@ function CompaniesPage() {
             <input style={inputStyle} value={form.companyName} onChange={(e) => updateField("companyName", e.target.value)} required />
             <label style={labelStyle}>Legal Company Name</label>
             <input style={inputStyle} value={form.legalCompanyName} onChange={(e) => updateField("legalCompanyName", e.target.value)} required />
-            <label style={labelStyle}>Brand Name (optional)</label>
-            <input style={inputStyle} value={form.brandName} onChange={(e) => updateField("brandName", e.target.value)} />
             <label style={labelStyle}>Company Type</label>
             <input style={inputStyle} value={form.companyType} onChange={(e) => updateField("companyType", e.target.value)} required />
             <label style={labelStyle}>GST Number</label>
@@ -238,8 +234,6 @@ function CompaniesPage() {
             <input style={inputStyle} value={editForm.companyName} onChange={(e) => updateEditField("companyName", e.target.value)} required />
             <label style={labelStyle}>Legal Company Name</label>
             <input style={inputStyle} value={editForm.legalCompanyName} onChange={(e) => updateEditField("legalCompanyName", e.target.value)} required />
-            <label style={labelStyle}>Brand Name</label>
-            <input style={inputStyle} value={editForm.brandName} onChange={(e) => updateEditField("brandName", e.target.value)} />
             <label style={labelStyle}>Company Type</label>
             <input style={inputStyle} value={editForm.companyType} onChange={(e) => updateEditField("companyType", e.target.value)} required />
             <label style={labelStyle}>Website</label>
