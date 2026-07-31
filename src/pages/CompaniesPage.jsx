@@ -152,6 +152,7 @@ function CompaniesPage() {
         <table style={{ width: "100%", borderCollapse: "collapse", margin: "16px 0 32px" }}>
           <thead>
             <tr style={{ textAlign: "left", borderBottom: "1px solid var(--color-border)" }}>
+              <th style={{ padding: 8 }}>ID</th>
               <th style={{ padding: 8 }}>Name</th>
               <th style={{ padding: 8 }}>Legal Name</th>
               <th style={{ padding: 8 }}>GST</th>
@@ -162,6 +163,7 @@ function CompaniesPage() {
           <tbody>
             {companies.map((c) => (
               <tr key={c._id} style={{ borderBottom: "1px solid var(--color-border)" }}>
+                <td style={{ padding: 8, fontFamily: "monospace", fontSize: 12 }}>{c._id}</td>
                 <td style={{ padding: 8 }}>{c.companyName}</td>
                 <td style={{ padding: 8 }}>{c.legalCompanyName}</td>
                 <td style={{ padding: 8 }}>{c.gstNumber}</td>
@@ -175,7 +177,7 @@ function CompaniesPage() {
             ))}
             {companies.length === 0 && (
               <tr>
-                <td colSpan={5} style={{ padding: 8, color: "var(--color-text-muted)" }}>
+                <td colSpan={6} style={{ padding: 8, color: "var(--color-text-muted)" }}>
                   No companies yet.
                 </td>
               </tr>

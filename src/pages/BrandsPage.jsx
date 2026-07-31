@@ -108,6 +108,7 @@ function BrandsPage() {
         <table style={{ width: "100%", borderCollapse: "collapse", margin: "16px 0 32px" }}>
           <thead>
             <tr style={{ textAlign: "left", borderBottom: "1px solid var(--color-border)" }}>
+              <th style={{ padding: 8 }}>ID</th>
               <th style={{ padding: 8 }}>Brand Name</th>
               <th style={{ padding: 8 }}>Status</th>
               <th style={{ padding: 8 }}></th>
@@ -116,6 +117,7 @@ function BrandsPage() {
           <tbody>
             {brands.map((b) => (
               <tr key={b._id} style={{ borderBottom: "1px solid var(--color-border)" }}>
+                <td style={{ padding: 8, fontFamily: "monospace", fontSize: 12 }}>{b._id}</td>
                 <td style={{ padding: 8 }}>{b.brandName}</td>
                 <td style={{ padding: 8 }}>{b.status}</td>
                 <td style={{ padding: 8 }}>
@@ -129,7 +131,7 @@ function BrandsPage() {
             ))}
             {brands.length === 0 && (
               <tr>
-                <td colSpan={3} style={{ padding: 8, color: "var(--color-text-muted)" }}>
+                <td colSpan={4} style={{ padding: 8, color: "var(--color-text-muted)" }}>
                   No brands yet.
                 </td>
               </tr>
