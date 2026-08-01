@@ -199,19 +199,21 @@ function PlantsPage() {
       {showAddForm && (
         <>
           <h3>Add Plant</h3>
-          <form onSubmit={handleCreate} style={{ maxWidth: 480 }}>
+          <form onSubmit={handleCreate} style={{ maxWidth: 700 }}>
             {user.role === "superAdmin" && (
               <>
                 <label style={labelStyle}>Company ID</label>
                 <input style={inputStyle} value={form.companyId} onChange={(e) => updateField("companyId", e.target.value)} required />
               </>
             )}
-            {fields.map(([key, label]) => (
-              <div key={key}>
-                <label style={labelStyle}>{label}</label>
-                <input style={inputStyle} value={form[key]} onChange={(e) => updateField(key, e.target.value)} required />
-              </div>
-            ))}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+              {fields.map(([key, label]) => (
+                <div key={key}>
+                  <label style={labelStyle}>{label}</label>
+                  <input style={inputStyle} value={form[key]} onChange={(e) => updateField(key, e.target.value)} required />
+                </div>
+              ))}
+            </div>
             {formError && <p style={{ color: "var(--color-danger)" }}>{formError}</p>}
             <div style={{ display: "flex", gap: 10 }}>
               <button
@@ -238,7 +240,7 @@ function PlantsPage() {
       )}
 
       {editingPlant && (
-        <div style={{ marginTop: 32, borderTop: "1px solid var(--color-border)", paddingTop: 20, maxWidth: 480 }}>
+        <div style={{ marginTop: 32, borderTop: "1px solid var(--color-border)", paddingTop: 20, maxWidth: 700 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <h3 style={{ margin: 0 }}>Edit: {editingPlant.plantName}</h3>
             <button onClick={cancelEdit} style={iconBtnStyle} title="Cancel">
@@ -246,12 +248,14 @@ function PlantsPage() {
             </button>
           </div>
           <form onSubmit={handleSaveEdit}>
-            {fields.map(([key, label]) => (
-              <div key={key}>
-                <label style={labelStyle}>{label}</label>
-                <input style={inputStyle} value={editForm[key]} onChange={(e) => updateEditField(key, e.target.value)} required />
-              </div>
-            ))}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+              {fields.map(([key, label]) => (
+                <div key={key}>
+                  <label style={labelStyle}>{label}</label>
+                  <input style={inputStyle} value={editForm[key]} onChange={(e) => updateEditField(key, e.target.value)} required />
+                </div>
+              ))}
+            </div>
             <label style={labelStyle}>Status</label>
             <select style={inputStyle} value={editStatus} onChange={(e) => setEditStatus(e.target.value)}>
               {STATUS_OPTIONS.map((s) => (

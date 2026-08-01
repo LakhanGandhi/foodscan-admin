@@ -191,31 +191,57 @@ function CompaniesPage() {
       {showAddForm && (
         <>
           <h3>Add Company</h3>
-          <form onSubmit={handleCreate} style={{ maxWidth: 480 }}>
-            <label style={labelStyle}>Company Name</label>
-            <input style={inputStyle} value={form.companyName} onChange={(e) => updateField("companyName", e.target.value)} required />
-            <label style={labelStyle}>Legal Company Name</label>
-            <input style={inputStyle} value={form.legalCompanyName} onChange={(e) => updateField("legalCompanyName", e.target.value)} required />
-            <label style={labelStyle}>Company Type</label>
-            <input style={inputStyle} value={form.companyType} onChange={(e) => updateField("companyType", e.target.value)} required />
-            <label style={labelStyle}>GST Number</label>
-            <input style={inputStyle} value={form.gstNumber} onChange={(e) => updateField("gstNumber", e.target.value)} required />
-            <label style={labelStyle}>Website</label>
-            <input style={inputStyle} value={form.website} onChange={(e) => updateField("website", e.target.value)} required />
-            <label style={labelStyle}>Email</label>
-            <input style={inputStyle} type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)} required />
-            <label style={labelStyle}>Phone Number</label>
-            <input style={inputStyle} value={form.phoneNumber} onChange={(e) => updateField("phoneNumber", e.target.value)} required />
-            <label style={labelStyle}>Address Line 1</label>
-            <input style={inputStyle} value={form.address.line1} onChange={(e) => updateAddressField("line1", e.target.value)} required />
-            <label style={labelStyle}>City</label>
-            <input style={inputStyle} value={form.address.city} onChange={(e) => updateAddressField("city", e.target.value)} required />
-            <label style={labelStyle}>State</label>
-            <input style={inputStyle} value={form.address.state} onChange={(e) => updateAddressField("state", e.target.value)} required />
-            <label style={labelStyle}>Country</label>
-            <input style={inputStyle} value={form.address.country} onChange={(e) => updateAddressField("country", e.target.value)} required />
-            <label style={labelStyle}>PIN Code</label>
-            <input style={inputStyle} value={form.address.pinCode} onChange={(e) => updateAddressField("pinCode", e.target.value)} required />
+          <form onSubmit={handleCreate} style={{ maxWidth: 700 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+              <div>
+                <label style={labelStyle}>Company Name</label>
+                <input style={inputStyle} value={form.companyName} onChange={(e) => updateField("companyName", e.target.value)} required />
+              </div>
+              <div>
+                <label style={labelStyle}>Legal Company Name</label>
+                <input style={inputStyle} value={form.legalCompanyName} onChange={(e) => updateField("legalCompanyName", e.target.value)} required />
+              </div>
+              <div>
+                <label style={labelStyle}>Company Type</label>
+                <input style={inputStyle} value={form.companyType} onChange={(e) => updateField("companyType", e.target.value)} required />
+              </div>
+              <div>
+                <label style={labelStyle}>GST Number</label>
+                <input style={inputStyle} value={form.gstNumber} onChange={(e) => updateField("gstNumber", e.target.value)} required />
+              </div>
+              <div>
+                <label style={labelStyle}>Website</label>
+                <input style={inputStyle} value={form.website} onChange={(e) => updateField("website", e.target.value)} required />
+              </div>
+              <div>
+                <label style={labelStyle}>Email</label>
+                <input style={inputStyle} type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)} required />
+              </div>
+              <div>
+                <label style={labelStyle}>Phone Number</label>
+                <input style={inputStyle} value={form.phoneNumber} onChange={(e) => updateField("phoneNumber", e.target.value)} required />
+              </div>
+              <div>
+                <label style={labelStyle}>Address Line 1</label>
+                <input style={inputStyle} value={form.address.line1} onChange={(e) => updateAddressField("line1", e.target.value)} required />
+              </div>
+              <div>
+                <label style={labelStyle}>City</label>
+                <input style={inputStyle} value={form.address.city} onChange={(e) => updateAddressField("city", e.target.value)} required />
+              </div>
+              <div>
+                <label style={labelStyle}>State</label>
+                <input style={inputStyle} value={form.address.state} onChange={(e) => updateAddressField("state", e.target.value)} required />
+              </div>
+              <div>
+                <label style={labelStyle}>Country</label>
+                <input style={inputStyle} value={form.address.country} onChange={(e) => updateAddressField("country", e.target.value)} required />
+              </div>
+              <div>
+                <label style={labelStyle}>PIN Code</label>
+                <input style={inputStyle} value={form.address.pinCode} onChange={(e) => updateAddressField("pinCode", e.target.value)} required />
+              </div>
+            </div>
 
             {formError && <p style={{ color: "var(--color-danger)" }}>{formError}</p>}
             <div style={{ display: "flex", gap: 10 }}>
@@ -239,7 +265,7 @@ function CompaniesPage() {
       )}
 
       {editingCompany && (
-        <div style={{ marginTop: 32, borderTop: "1px solid var(--color-border)", paddingTop: 20, maxWidth: 480 }}>
+        <div style={{ marginTop: 32, borderTop: "1px solid var(--color-border)", paddingTop: 20, maxWidth: 700 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <h3 style={{ margin: 0 }}>Edit: {editingCompany.companyName}</h3>
             <button onClick={cancelEdit} style={iconBtnStyle} title="Cancel">
@@ -247,18 +273,32 @@ function CompaniesPage() {
             </button>
           </div>
           <form onSubmit={handleSaveEdit}>
-            <label style={labelStyle}>Company Name</label>
-            <input style={inputStyle} value={editForm.companyName} onChange={(e) => updateEditField("companyName", e.target.value)} required />
-            <label style={labelStyle}>Legal Company Name</label>
-            <input style={inputStyle} value={editForm.legalCompanyName} onChange={(e) => updateEditField("legalCompanyName", e.target.value)} required />
-            <label style={labelStyle}>Company Type</label>
-            <input style={inputStyle} value={editForm.companyType} onChange={(e) => updateEditField("companyType", e.target.value)} required />
-            <label style={labelStyle}>Website</label>
-            <input style={inputStyle} value={editForm.website} onChange={(e) => updateEditField("website", e.target.value)} required />
-            <label style={labelStyle}>Email</label>
-            <input style={inputStyle} type="email" value={editForm.email} onChange={(e) => updateEditField("email", e.target.value)} required />
-            <label style={labelStyle}>Phone Number</label>
-            <input style={inputStyle} value={editForm.phoneNumber} onChange={(e) => updateEditField("phoneNumber", e.target.value)} required />
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+              <div>
+                <label style={labelStyle}>Company Name</label>
+                <input style={inputStyle} value={editForm.companyName} onChange={(e) => updateEditField("companyName", e.target.value)} required />
+              </div>
+              <div>
+                <label style={labelStyle}>Legal Company Name</label>
+                <input style={inputStyle} value={editForm.legalCompanyName} onChange={(e) => updateEditField("legalCompanyName", e.target.value)} required />
+              </div>
+              <div>
+                <label style={labelStyle}>Company Type</label>
+                <input style={inputStyle} value={editForm.companyType} onChange={(e) => updateEditField("companyType", e.target.value)} required />
+              </div>
+              <div>
+                <label style={labelStyle}>Website</label>
+                <input style={inputStyle} value={editForm.website} onChange={(e) => updateEditField("website", e.target.value)} required />
+              </div>
+              <div>
+                <label style={labelStyle}>Email</label>
+                <input style={inputStyle} type="email" value={editForm.email} onChange={(e) => updateEditField("email", e.target.value)} required />
+              </div>
+              <div>
+                <label style={labelStyle}>Phone Number</label>
+                <input style={inputStyle} value={editForm.phoneNumber} onChange={(e) => updateEditField("phoneNumber", e.target.value)} required />
+              </div>
+            </div>
 
             <label style={labelStyle}>Status</label>
             <select style={inputStyle} value={editStatus} onChange={(e) => setEditStatus(e.target.value)}>
