@@ -13,19 +13,23 @@ const navItems = [
   { to: "/dashboard/analytics", label: "Analytics", icon: ClipboardCheck },
 ];
 
-const linkStyle = ({ isActive }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: 12,
-  padding: "12px 24px",
-  textDecoration: "none",
-  whiteSpace: "nowrap",
-  color: isActive ? "var(--color-primary)" : "var(--color-text)",
-});
+function getLinkStyle(open) {
+  return ({ isActive }) => ({
+    display: "flex",
+    alignItems: "center",
+    justifyContent: open ? "flex-start" : "center",
+    gap: 12,
+    padding: open ? "12px 24px" : "12px 0",
+    textDecoration: "none",
+    whiteSpace: "nowrap",
+    color: isActive ? "var(--color-primary)" : "var(--color-text)",
+  });
+}
 
 function DashboardLayout() {
   const [open, setOpen] = useState(false);
   const sidebarWidth = open ? 220 : 72;
+  const linkStyle = getLinkStyle(open);
 
   return (
     <div>
@@ -49,9 +53,13 @@ function DashboardLayout() {
         <div>
           <div
             style={{
-              padding: "20px 24px",
+              height: 56,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: open ? "flex-start" : "center",
+              padding: open ? "0 24px" : "0",
               fontFamily: "var(--font-logo)",
-              fontSize: open ? 26 : 20,
+              fontSize: open ? 26 : 22,
               color: "var(--color-primary)",
               whiteSpace: "nowrap",
               overflow: "hidden",
