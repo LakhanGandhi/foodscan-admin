@@ -153,9 +153,10 @@ function PlantsPage() {
       {error && <p style={{ color: "var(--color-danger)" }}>{error}</p>}
 
       {!loading && !error && (
-        <table style={{ width: "100%", borderCollapse: "collapse", margin: "16px 0 32px" }}>
+        <div style={{ maxHeight: 400, overflowY: "auto", border: "1px solid var(--color-border)", marginBottom: 24 }}>
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ textAlign: "left", borderBottom: "1px solid var(--color-border)" }}>
+            <tr style={{ textAlign: "left", borderBottom: "1px solid var(--color-border)", position: "sticky", top: 0, background: "var(--color-card)" }}>
               <th style={{ padding: 8 }}>ID</th>
               <th style={{ padding: 8 }}>Plant Name</th>
               <th style={{ padding: 8 }}>Code</th>
@@ -192,6 +193,7 @@ function PlantsPage() {
             )}
           </tbody>
         </table>
+        </div>
       )}
 
       {showAddForm && (
