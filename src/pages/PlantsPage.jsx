@@ -211,13 +211,26 @@ function PlantsPage() {
               </div>
             ))}
             {formError && <p style={{ color: "var(--color-danger)" }}>{formError}</p>}
-            <button
-              type="submit"
-              disabled={submitting}
-              style={{ padding: "10px 20px", border: "none", borderRadius: 999, background: "var(--color-primary)", color: "#fff", cursor: "pointer" }}
-            >
-              {submitting ? "Creating..." : "Create Plant"}
-            </button>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                type="submit"
+                disabled={submitting}
+                style={{ padding: "10px 20px", border: "none", borderRadius: 999, background: "var(--color-primary)", color: "#fff", cursor: "pointer" }}
+              >
+                {submitting ? "Creating..." : "Create Plant"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setForm(emptyForm);
+                  setFormError("");
+                  setShowAddForm(false);
+                }}
+                style={{ padding: "10px 20px", border: "1px solid var(--color-border)", borderRadius: 999, background: "#fff", cursor: "pointer" }}
+              >
+                Cancel
+              </button>
+            </div>
           </form>
         </>
       )}

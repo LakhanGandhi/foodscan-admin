@@ -156,13 +156,27 @@ function BrandsPage() {
             <input style={inputStyle} value={brandName} onChange={(e) => setBrandName(e.target.value)} required />
 
             {formError && <p style={{ color: "var(--color-danger)" }}>{formError}</p>}
-            <button
-              type="submit"
-              disabled={submitting}
-              style={{ padding: "10px 20px", border: "none", borderRadius: 999, background: "var(--color-primary)", color: "#fff", cursor: "pointer" }}
-            >
-              {submitting ? "Creating..." : "Create Brand"}
-            </button>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                type="submit"
+                disabled={submitting}
+                style={{ padding: "10px 20px", border: "none", borderRadius: 999, background: "var(--color-primary)", color: "#fff", cursor: "pointer" }}
+              >
+                {submitting ? "Creating..." : "Create Brand"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setBrandName("");
+                  setCompanyId("");
+                  setFormError("");
+                  setShowAddForm(false);
+                }}
+                style={{ padding: "10px 20px", border: "1px solid var(--color-border)", borderRadius: 999, background: "#fff", cursor: "pointer" }}
+              >
+                Cancel
+              </button>
+            </div>
           </form>
         </>
       )}
