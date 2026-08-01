@@ -110,6 +110,7 @@ function BrandsPage() {
             <tr style={{ textAlign: "left", borderBottom: "1px solid var(--color-border)" }}>
               <th style={{ padding: 8 }}>ID</th>
               <th style={{ padding: 8 }}>Brand Name</th>
+              <th style={{ padding: 8 }}>Company Name</th>
               <th style={{ padding: 8 }}>Status</th>
               <th style={{ padding: 8 }}></th>
             </tr>
@@ -119,6 +120,7 @@ function BrandsPage() {
               <tr key={b._id} style={{ borderBottom: "1px solid var(--color-border)" }}>
                 <td style={{ padding: 8, fontFamily: "monospace", fontSize: 12 }}>{b._id}</td>
                 <td style={{ padding: 8 }}>{b.brandName}</td>
+                <td style={{ padding: 8 }}>{b.companyName}</td>
                 <td style={{ padding: 8 }}>{b.status}</td>
                 <td style={{ padding: 8 }}>
                   {canManage && (
@@ -131,7 +133,7 @@ function BrandsPage() {
             ))}
             {brands.length === 0 && (
               <tr>
-                <td colSpan={4} style={{ padding: 8, color: "var(--color-text-muted)" }}>
+                <td colSpan={5} style={{ padding: 8, color: "var(--color-text-muted)" }}>
                   No brands yet.
                 </td>
               </tr>
