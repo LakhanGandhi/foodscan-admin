@@ -191,7 +191,7 @@ function CompaniesPage() {
       {showAddForm && (
         <>
           <h3>Add Company</h3>
-          <form onSubmit={handleCreate} style={{ maxWidth: 700 }}>
+          <form onSubmit={handleCreate} style={{ maxWidth: 700, margin: "0 auto" }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
               <div>
                 <label style={labelStyle}>Company Name</label>
@@ -265,7 +265,7 @@ function CompaniesPage() {
       )}
 
       {editingCompany && (
-        <div style={{ marginTop: 32, borderTop: "1px solid var(--color-border)", paddingTop: 20, maxWidth: 700 }}>
+        <div style={{ marginTop: 32, borderTop: "1px solid var(--color-border)", paddingTop: 20, maxWidth: 700, marginLeft: "auto", marginRight: "auto" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <h3 style={{ margin: 0 }}>Edit: {editingCompany.companyName}</h3>
             <button onClick={cancelEdit} style={iconBtnStyle} title="Cancel">

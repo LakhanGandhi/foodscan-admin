@@ -161,7 +161,7 @@ function EmployeesPage() {
       {showAddForm && (
         <>
           <h3>Add User</h3>
-          <form onSubmit={handleCreate} style={{ maxWidth: 700 }}>
+          <form onSubmit={handleCreate} style={{ maxWidth: 700, margin: "0 auto" }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
               <div>
                 <label style={labelStyle}>Name</label>

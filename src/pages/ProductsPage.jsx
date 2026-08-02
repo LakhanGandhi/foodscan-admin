@@ -182,7 +182,7 @@ function ProductsPage() {
       {showAddForm && (
         <>
           <h3>Add Product</h3>
-          <form onSubmit={handleCreate} style={{ maxWidth: 700 }}>
+          <form onSubmit={handleCreate} style={{ maxWidth: 700, margin: "0 auto" }}>
             {user.role === "superAdmin" && (
               <>
                 <label style={labelStyle}>Company ID</label>
@@ -223,7 +223,7 @@ function ProductsPage() {
       )}
 
       {editingProduct && (
-        <div style={{ marginTop: 32, borderTop: "1px solid var(--color-border)", paddingTop: 20, maxWidth: 700 }}>
+        <div style={{ marginTop: 32, borderTop: "1px solid var(--color-border)", paddingTop: 20, maxWidth: 700, marginLeft: "auto", marginRight: "auto" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <h3 style={{ margin: 0 }}>Edit: {editingProduct.productName}</h3>
             <button onClick={cancelEdit} style={iconBtnStyle} title="Cancel">
