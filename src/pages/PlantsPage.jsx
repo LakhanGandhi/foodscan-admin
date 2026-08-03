@@ -159,6 +159,7 @@ function PlantsPage() {
             <tr style={{ textAlign: "left", borderBottom: "1px solid var(--color-border)", position: "sticky", top: 0, background: "var(--color-card)" }}>
               <th style={{ padding: 8 }}>ID</th>
               <th style={{ padding: 8 }}>Plant Name</th>
+              <th style={{ padding: 8 }}>Company Name</th>
               <th style={{ padding: 8 }}>Code</th>
               <th style={{ padding: 8 }}>City</th>
               <th style={{ padding: 8 }}>FSSAI</th>
@@ -171,6 +172,7 @@ function PlantsPage() {
               <tr key={p._id} style={{ borderBottom: "1px solid var(--color-border)" }}>
                 <td style={{ padding: 8, fontFamily: "monospace", fontSize: 12 }}>{p._id}</td>
                 <td style={{ padding: 8 }}>{p.plantName}</td>
+                <td style={{ padding: 8 }}>{p.companyName}</td>
                 <td style={{ padding: 8 }}>{p.plantCode}</td>
                 <td style={{ padding: 8 }}>{p.city}</td>
                 <td style={{ padding: 8 }}>{p.fssaiLicense}</td>
@@ -186,7 +188,7 @@ function PlantsPage() {
             ))}
             {plants.length === 0 && (
               <tr>
-                <td colSpan={7} style={{ padding: 8, color: "var(--color-text-muted)" }}>
+                <td colSpan={8} style={{ padding: 8, color: "var(--color-text-muted)" }}>
                   No plants yet.
                 </td>
               </tr>

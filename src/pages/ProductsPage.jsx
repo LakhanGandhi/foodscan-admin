@@ -5,7 +5,6 @@ import { listProducts, createProduct, updateProduct } from "../api/products";
 
 const emptyForm = {
   companyId: "",
-  plantId: "",
   brandId: "",
   productName: "",
   sku: "",
@@ -83,7 +82,6 @@ function ProductsPage() {
       sku: product.sku,
       category: product.category,
       countryOfOrigin: product.countryOfOrigin,
-      plantId: product.plantId,
       brandId: product.brandId,
     });
     setEditStatus(product.status);
@@ -119,7 +117,6 @@ function ProductsPage() {
     ["sku", "SKU"],
     ["category", "Category"],
     ["countryOfOrigin", "Country of Origin"],
-    ["plantId", "Plant ID"],
     ["brandId", "Brand ID"],
   ];
 
@@ -237,7 +234,6 @@ function ProductsPage() {
                 ["sku", "SKU"],
                 ["category", "Category"],
                 ["countryOfOrigin", "Country of Origin"],
-                ["plantId", "Plant ID"],
                 ["brandId", "Brand ID"],
               ].map(([key, label]) => (
                 <div key={key}>
