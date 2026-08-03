@@ -10,6 +10,7 @@ import CompaniesPage from "./pages/CompaniesPage";
 import BrandsPage from "./pages/BrandsPage";
 import PlantsPage from "./pages/PlantsPage";
 import ProductsPage from "./pages/ProductsPage";
+import BatchesPage from "./pages/BatchesPage";
 import EmployeesPage from "./pages/EmployeesPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import UserSettingsPage from "./pages/UserSettingsPage";
@@ -36,6 +37,7 @@ function App() {
           <Route path="brands" element={<BrandsPage />} />
           <Route path="plants" element={<PlantsPage />} />
           <Route path="products" element={<ProductsPage />} />
+          <Route path="batches" element={<BatchesPage />} />
           <Route path="employees" element={<EmployeesPage />} />
           <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="settings" element={<UserSettingsPage />} />

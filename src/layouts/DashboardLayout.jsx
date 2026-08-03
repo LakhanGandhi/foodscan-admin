@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import { Home, TrendingUp, Building2, Tag, Factory, ShoppingCart, Users, ClipboardCheck, UserCircle, ChevronRight, ChevronLeft } from "lucide-react";
+import { Home, TrendingUp, Building2, Tag, Factory, ShoppingCart, Layers, Users, ClipboardCheck, UserCircle, ChevronRight, ChevronLeft } from "lucide-react";
 
 const navItems = [
   { to: "/dashboard/home", label: "Home", icon: Home },
@@ -9,6 +9,7 @@ const navItems = [
   { to: "/dashboard/brands", label: "Brands", icon: Tag },
   { to: "/dashboard/plants", label: "Plants", icon: Factory },
   { to: "/dashboard/products", label: "Products", icon: ShoppingCart },
+  { to: "/dashboard/batches", label: "Batches", icon: Layers },
   { to: "/dashboard/employees", label: "Employees", icon: Users },
   { to: "/dashboard/analytics", label: "Analytics", icon: ClipboardCheck },
 ];
