@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, QrCode, X } from "lucide-react";
+import { Plus, Pencil, QrCode, X } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import client from "../api/client";
 import { listBatches, createBatch, updateBatch } from "../api/batches";
@@ -68,6 +68,43 @@ function BatchesPage() {
       setFormError(err.response?.data?.error?.message || "Failed to create batch.");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  const isAdmin = user?.role === "superAdmin" || user?.role === "companyAdmin";
+  const [editingBatch, setEditingBatch] = useState(null);
+  const [editForm, setEditForm] = useState(null);
+  const [editSubmitting, setEditSubmitting] = useState(false);
+  const [editError, setEditError] = useState("");
+
+  function startEdit(batch) {
+    setEditingBatch(batch);
+    setEditForm({
+      batchNumber: batch.batchNumber,
+      mfgDate: batch.mfgDate ? batch.mfgDate.slice(0, 10) : "",
+      expDate: batch.expDate ? batch.expDate.slice(0, 10) : "",
+      status: batch.status,
+    });
+    setEditError("");
+  }
+
+  function cancelEdit() {
+    setEditingBatch(null);
+    setEditForm(null);
+  }
+
+  async function handleSaveEdit(e) {
+    e.preventDefault();
+    setEditError("");
+    setEditSubmitting(true);
+    try {
+      await updateBatch(editingBatch._id, editForm);
+      cancelEdit();
+      await loadBatches();
+    } catch (err) {
+      setEditError(err.response?.data?.error?.message || "Failed to update batch.");
+    } finally {
+      setEditSubmitting(false);
     }
   }
 
@@ -154,7 +191,12 @@ function BatchesPage() {
                   <td style={{ padding: 8 }}>{formatDate(b.mfgDate)}</td>
                   <td style={{ padding: 8 }}>{formatDate(b.expDate)}</td>
                   <td style={{ padding: 8 }}>{b.status}</td>
-                  <td style={{ padding: 8 }}>
+                  <td style={{ padding: 8, display: "flex", gap: 8 }}>
+                    {isAdmin && (
+                      <button onClick={() => startEdit(b)} style={iconBtnStyle} title="Edit">
+                        <Pencil size={18} />
+                      </button>
+                    )}
                     <button onClick={() => handleShowQr(b)} style={iconBtnStyle} title="Generate QR">
                       <QrCode size={18} />
                     </button>
@@ -223,6 +265,69 @@ function BatchesPage() {
             </div>
           </form>
         </>
+      )}
+
+      {editingBatch && (
+        <div style={{ marginTop: 32, borderTop: "1px solid var(--color-border)", paddingTop: 20, maxWidth: 480, marginLeft: "auto", marginRight: "auto" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <h3 style={{ margin: 0 }}>Edit Batch: {editingBatch.batchNumber}</h3>
+            <button onClick={cancelEdit} style={iconBtnStyle} title="Cancel">
+              <X size={20} />
+            </button>
+          </div>
+          <form onSubmit={handleSaveEdit}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+              <div>
+                <label style={labelStyle}>Batch Number</label>
+                <input
+                  style={inputStyle}
+                  value={editForm.batchNumber}
+                  onChange={(e) => setEditForm((p) => ({ ...p, batchNumber: e.target.value }))}
+                  required
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Status</label>
+                <select
+                  style={inputStyle}
+                  value={editForm.status}
+                  onChange={(e) => setEditForm((p) => ({ ...p, status: e.target.value }))}
+                >
+                  <option value="active">active</option>
+                  <option value="recalled">recalled</option>
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Manufacturing Date</label>
+                <input
+                  style={inputStyle}
+                  type="date"
+                  value={editForm.mfgDate}
+                  onChange={(e) => setEditForm((p) => ({ ...p, mfgDate: e.target.value }))}
+                  required
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Expiry Date</label>
+                <input
+                  style={inputStyle}
+                  type="date"
+                  value={editForm.expDate}
+                  onChange={(e) => setEditForm((p) => ({ ...p, expDate: e.target.value }))}
+                  required
+                />
+              </div>
+            </div>
+            {editError && <p style={{ color: "var(--color-danger)" }}>{editError}</p>}
+            <button
+              type="submit"
+              disabled={editSubmitting}
+              style={{ padding: "10px 20px", border: "none", borderRadius: 999, background: "var(--color-primary)", color: "#fff", cursor: "pointer" }}
+            >
+              {editSubmitting ? "Saving..." : "Save Changes"}
+            </button>
+          </form>
+        </div>
       )}
 
       {qrBatch && (
