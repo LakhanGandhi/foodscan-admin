@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { Home, TrendingUp, Building2, Tag, Factory, ShoppingCart, Layers, Users, ClipboardCheck, UserCircle, ChevronRight, ChevronLeft } from "lucide-react";
+import { useAuth } from "../auth/AuthContext";
 
 const navItems = [
   { to: "/dashboard/home", label: "Home", icon: Home },
   { to: "/dashboard/overview", label: "Dashboard", icon: TrendingUp },
-  { to: "/dashboard/companies", label: "Companies", icon: Building2 },
+  { to: "/dashboard/companies", label: "Companies", icon: Building2, hideFor: ["companyEmployee"] },
   { to: "/dashboard/brands", label: "Brands", icon: Tag },
   { to: "/dashboard/plants", label: "Plants", icon: Factory },
   { to: "/dashboard/products", label: "Products", icon: ShoppingCart },
@@ -28,9 +29,12 @@ function getLinkStyle(open) {
 }
 
 function DashboardLayout() {
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const sidebarWidth = open ? 220 : 72;
   const linkStyle = getLinkStyle(open);
+
+  const visibleNavItems = navItems.filter((item) => !item.hideFor?.includes(user?.role));
 
   return (
     <div>
@@ -70,7 +74,7 @@ function DashboardLayout() {
           </div>
 
           <nav style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            {navItems.map(({ to, label, icon: Icon }) => (
+            {visibleNavItems.map(({ to, label, icon: Icon }) => (
               <NavLink key={to} to={to} style={linkStyle}>
                 <Icon size={22} style={{ flexShrink: 0 }} />
                 {open && <span>{label}</span>}

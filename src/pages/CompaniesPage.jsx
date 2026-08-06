@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Pencil, X } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
-import { listCompanies, createCompany, updateCompany, changeCompanyStatus } from "../api/companies";
+import { listCompanies, getCompany, createCompany, updateCompany, changeCompanyStatus } from "../api/companies";
 
 const emptyForm = {
   companyName: "",
@@ -22,6 +22,7 @@ const iconBtnStyle = { border: "none", background: "none", cursor: "pointer", co
 function CompaniesPage() {
   const { user } = useAuth();
   const isSuperAdmin = user?.role === "superAdmin";
+  const isCompanyAdmin = user?.role === "companyAdmin";
 
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,6 +38,15 @@ function CompaniesPage() {
   const [editStatus, setEditStatus] = useState("");
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editError, setEditError] = useState("");
+
+  // Company Admin "my company" state
+  const [myCompany, setMyCompany] = useState(null);
+  const [myCompanyLoading, setMyCompanyLoading] = useState(true);
+  const [myCompanyError, setMyCompanyError] = useState("");
+  const [myCompanyForm, setMyCompanyForm] = useState(null);
+  const [myCompanySubmitting, setMyCompanySubmitting] = useState(false);
+  const [myCompanySaveError, setMyCompanySaveError] = useState("");
+  const [myCompanySaved, setMyCompanySaved] = useState(false);
 
   async function loadCompanies() {
     if (!isSuperAdmin) {
@@ -55,8 +65,34 @@ function CompaniesPage() {
     }
   }
 
+  async function loadMyCompany() {
+    if (!isCompanyAdmin) {
+      setMyCompanyLoading(false);
+      return;
+    }
+    setMyCompanyLoading(true);
+    try {
+      const data = await getCompany(user.companyId);
+      setMyCompany(data);
+      setMyCompanyForm({
+        companyName: data.companyName,
+        legalCompanyName: data.legalCompanyName,
+        companyType: data.companyType,
+        website: data.website,
+        email: data.email,
+        phoneNumber: data.phoneNumber,
+      });
+      setMyCompanyError("");
+    } catch (err) {
+      setMyCompanyError(err.response?.data?.error?.message || "Failed to load your company.");
+    } finally {
+      setMyCompanyLoading(false);
+    }
+  }
+
   useEffect(() => {
     loadCompanies();
+    loadMyCompany();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -124,14 +160,124 @@ function CompaniesPage() {
     }
   }
 
+  function updateMyCompanyField(field, value) {
+    setMyCompanyForm((prev) => ({ ...prev, [field]: value }));
+    setMyCompanySaved(false);
+  }
+
+  async function handleSaveMyCompany(e) {
+    e.preventDefault();
+    setMyCompanySaveError("");
+    setMyCompanySaved(false);
+    setMyCompanySubmitting(true);
+    try {
+      const updated = await updateCompany(user.companyId, myCompanyForm);
+      setMyCompany(updated);
+      setMyCompanySaved(true);
+    } catch (err) {
+      setMyCompanySaveError(err.response?.data?.error?.message || "Failed to update company.");
+    } finally {
+      setMyCompanySubmitting(false);
+    }
+  }
+
+  // --- Company Admin view: their own company only ---
+  if (isCompanyAdmin) {
+    return (
+      <div>
+        <h2 style={{ margin: 0 }}>My Company</h2>
+
+        {myCompanyLoading && <p>Loading...</p>}
+        {myCompanyError && <p style={{ color: "var(--color-danger)" }}>{myCompanyError}</p>}
+
+        {!myCompanyLoading && !myCompanyError && myCompanyForm && (
+          <div style={{ marginTop: 20, maxWidth: 700 }}>
+            <div style={{ marginBottom: 16, fontSize: 13 }}>
+              <span style={{ fontWeight: 600 }}>Status: </span>
+              <span>{myCompany?.status}</span>
+            </div>
+
+            <form onSubmit={handleSaveMyCompany}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+                <div>
+                  <label style={labelStyle}>Company Name</label>
+                  <input
+                    style={inputStyle}
+                    value={myCompanyForm.companyName}
+                    onChange={(e) => updateMyCompanyField("companyName", e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label style={labelStyle}>Legal Company Name</label>
+                  <input
+                    style={inputStyle}
+                    value={myCompanyForm.legalCompanyName}
+                    onChange={(e) => updateMyCompanyField("legalCompanyName", e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label style={labelStyle}>Company Type</label>
+                  <input
+                    style={inputStyle}
+                    value={myCompanyForm.companyType}
+                    onChange={(e) => updateMyCompanyField("companyType", e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label style={labelStyle}>Website</label>
+                  <input
+                    style={inputStyle}
+                    value={myCompanyForm.website}
+                    onChange={(e) => updateMyCompanyField("website", e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label style={labelStyle}>Email</label>
+                  <input
+                    style={inputStyle}
+                    type="email"
+                    value={myCompanyForm.email}
+                    onChange={(e) => updateMyCompanyField("email", e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label style={labelStyle}>Phone Number</label>
+                  <input
+                    style={inputStyle}
+                    value={myCompanyForm.phoneNumber}
+                    onChange={(e) => updateMyCompanyField("phoneNumber", e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              {myCompanySaveError && <p style={{ color: "var(--color-danger)" }}>{myCompanySaveError}</p>}
+              {myCompanySaved && <p style={{ color: "var(--color-primary)" }}>Saved.</p>}
+
+              <button
+                type="submit"
+                disabled={myCompanySubmitting}
+                style={{ padding: "10px 20px", border: "none", borderRadius: 999, background: "var(--color-primary)", color: "#fff", cursor: "pointer" }}
+              >
+                {myCompanySubmitting ? "Saving..." : "Save Changes"}
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   if (!isSuperAdmin) {
     return (
       <div>
         <h2>Companies</h2>
-        <p style={{ color: "var(--color-text-muted)" }}>
-          Viewing all companies is a Super Admin feature. Your own company's details will be available from a
-          dedicated page soon.
-        </p>
+        <p style={{ color: "var(--color-text-muted)" }}>You do not have access to company information.</p>
       </div>
     );
   }
