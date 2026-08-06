@@ -10,12 +10,25 @@ const emptyForm = {
   sku: "",
   category: "",
   countryOfOrigin: "",
+  ingredientsText: "",
+  allergensText: "",
+  certificationsText: "",
+  nutrition: { energy: "", protein: "", fat: "", saturatedFat: "", carbohydrates: "", sugars: "", fiber: "", sodium: "" },
 };
 
 const STATUS_OPTIONS = ["active", "hidden", "discontinued"];
 const inputStyle = { width: "100%", padding: 8, marginTop: 4, marginBottom: 12 };
+const textareaStyle = { ...inputStyle, minHeight: 60, resize: "vertical", fontFamily: "inherit" };
 const labelStyle = { fontSize: 13, fontWeight: 600 };
 const iconBtnStyle = { border: "none", background: "none", cursor: "pointer", color: "var(--color-primary)" };
+
+// "a, b, c" -> ["a","b","c"], dropping empty entries
+function parseCommaList(text) {
+  return (text || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
 
 function ProductsPage() {
   const { user } = useAuth();
@@ -57,12 +70,23 @@ function ProductsPage() {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
+  function updateNutritionField(field, value) {
+    setForm((prev) => ({ ...prev, nutrition: { ...prev.nutrition, [field]: value } }));
+  }
+
   async function handleCreate(e) {
     e.preventDefault();
     setFormError("");
     setSubmitting(true);
     try {
-      const payload = { ...form };
+      const { ingredientsText, allergensText, certificationsText, nutrition, ...rest } = form;
+      const payload = {
+        ...rest,
+        ingredients: parseCommaList(ingredientsText),
+        allergens: parseCommaList(allergensText),
+        certifications: parseCommaList(certificationsText),
+        nutritionPer100g: nutrition,
+      };
       if (user.role !== "superAdmin") delete payload.companyId;
       await createProduct(payload);
       setForm(emptyForm);
@@ -83,6 +107,19 @@ function ProductsPage() {
       category: product.category,
       countryOfOrigin: product.countryOfOrigin,
       brandId: product.brandId,
+      ingredientsText: (product.ingredients || []).join(", "),
+      allergensText: (product.allergens || []).join(", "),
+      certificationsText: (product.certifications || []).join(", "),
+      nutrition: {
+        energy: product.nutritionPer100g?.energy || "",
+        protein: product.nutritionPer100g?.protein || "",
+        fat: product.nutritionPer100g?.fat || "",
+        saturatedFat: product.nutritionPer100g?.saturatedFat || "",
+        carbohydrates: product.nutritionPer100g?.carbohydrates || "",
+        sugars: product.nutritionPer100g?.sugars || "",
+        fiber: product.nutritionPer100g?.fiber || "",
+        sodium: product.nutritionPer100g?.sodium || "",
+      },
     });
     setEditStatus(product.status);
     setEditError("");
@@ -97,12 +134,24 @@ function ProductsPage() {
     setEditForm((prev) => ({ ...prev, [field]: value }));
   }
 
+  function updateEditNutritionField(field, value) {
+    setEditForm((prev) => ({ ...prev, nutrition: { ...prev.nutrition, [field]: value } }));
+  }
+
   async function handleSaveEdit(e) {
     e.preventDefault();
     setEditError("");
     setEditSubmitting(true);
     try {
-      await updateProduct(editingProduct._id, { ...editForm, status: editStatus });
+      const { ingredientsText, allergensText, certificationsText, nutrition, ...rest } = editForm;
+      await updateProduct(editingProduct._id, {
+        ...rest,
+        ingredients: parseCommaList(ingredientsText),
+        allergens: parseCommaList(allergensText),
+        certifications: parseCommaList(certificationsText),
+        nutritionPer100g: nutrition,
+        status: editStatus,
+      });
       cancelEdit();
       await loadProducts();
     } catch (err) {
@@ -194,6 +243,48 @@ function ProductsPage() {
                 </div>
               ))}
             </div>
+
+            <label style={labelStyle}>Ingredients (comma-separated)</label>
+            <textarea
+              style={textareaStyle}
+              value={form.ingredientsText}
+              onChange={(e) => updateField("ingredientsText", e.target.value)}
+              placeholder="Wheat flour, Sugar, Palm oil, Salt"
+            />
+            <label style={labelStyle}>Allergens (comma-separated)</label>
+            <textarea
+              style={textareaStyle}
+              value={form.allergensText}
+              onChange={(e) => updateField("allergensText", e.target.value)}
+              placeholder="Wheat (Gluten), Soy, Milk"
+            />
+            <label style={labelStyle}>Certifications (comma-separated)</label>
+            <textarea
+              style={textareaStyle}
+              value={form.certificationsText}
+              onChange={(e) => updateField("certificationsText", e.target.value)}
+              placeholder="ISO 22000, FSSC 22000"
+            />
+
+            <label style={{ ...labelStyle, display: "block", marginTop: 8 }}>Nutrition (per 100g)</label>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+              {[
+                ["energy", "Energy (e.g. 462 kcal)"],
+                ["protein", "Protein (e.g. 7.1 g)"],
+                ["fat", "Fat (e.g. 16.8 g)"],
+                ["saturatedFat", "Saturated Fat (e.g. 8.2 g)"],
+                ["carbohydrates", "Carbohydrates (e.g. 70.4 g)"],
+                ["sugars", "Sugars (e.g. 18.2 g)"],
+                ["fiber", "Fiber (e.g. 3.1 g)"],
+                ["sodium", "Sodium (e.g. 410 mg)"],
+              ].map(([key, label]) => (
+                <div key={key}>
+                  <label style={labelStyle}>{label}</label>
+                  <input style={inputStyle} value={form.nutrition[key]} onChange={(e) => updateNutritionField(key, e.target.value)} />
+                </div>
+              ))}
+            </div>
+
             {formError && <p style={{ color: "var(--color-danger)" }}>{formError}</p>}
             <div style={{ display: "flex", gap: 10 }}>
               <button
@@ -242,6 +333,45 @@ function ProductsPage() {
                 </div>
               ))}
             </div>
+
+            <label style={labelStyle}>Ingredients (comma-separated)</label>
+            <textarea
+              style={textareaStyle}
+              value={editForm.ingredientsText}
+              onChange={(e) => updateEditField("ingredientsText", e.target.value)}
+            />
+            <label style={labelStyle}>Allergens (comma-separated)</label>
+            <textarea
+              style={textareaStyle}
+              value={editForm.allergensText}
+              onChange={(e) => updateEditField("allergensText", e.target.value)}
+            />
+            <label style={labelStyle}>Certifications (comma-separated)</label>
+            <textarea
+              style={textareaStyle}
+              value={editForm.certificationsText}
+              onChange={(e) => updateEditField("certificationsText", e.target.value)}
+            />
+
+            <label style={{ ...labelStyle, display: "block", marginTop: 8 }}>Nutrition (per 100g)</label>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+              {[
+                ["energy", "Energy"],
+                ["protein", "Protein"],
+                ["fat", "Fat"],
+                ["saturatedFat", "Saturated Fat"],
+                ["carbohydrates", "Carbohydrates"],
+                ["sugars", "Sugars"],
+                ["fiber", "Fiber"],
+                ["sodium", "Sodium"],
+              ].map(([key, label]) => (
+                <div key={key}>
+                  <label style={labelStyle}>{label}</label>
+                  <input style={inputStyle} value={editForm.nutrition[key]} onChange={(e) => updateEditNutritionField(key, e.target.value)} />
+                </div>
+              ))}
+            </div>
+
             <label style={labelStyle}>Status</label>
             <select style={inputStyle} value={editStatus} onChange={(e) => setEditStatus(e.target.value)}>
               {STATUS_OPTIONS.map((s) => (
