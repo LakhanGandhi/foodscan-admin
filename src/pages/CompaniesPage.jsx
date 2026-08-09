@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Plus, Pencil, X } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import { listCompanies, getCompany, createCompany, updateCompany, changeCompanyStatus } from "../api/companies";
+import { getPendingForCompany, listPendingChangeRequests, approveChangeRequest, rejectChangeRequest } from "../api/changeRequests";
 
 const emptyForm = {
   companyName: "",
@@ -39,6 +40,14 @@ function CompaniesPage() {
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editError, setEditError] = useState("");
 
+  // Super Admin "pending change requests" review state
+  const [pendingChangeRequests, setPendingChangeRequests] = useState([]);
+  const [pendingRequestsLoading, setPendingRequestsLoading] = useState(true);
+  const [pendingRequestsError, setPendingRequestsError] = useState("");
+  const [reviewingRequest, setReviewingRequest] = useState(null);
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewError, setReviewError] = useState("");
+
   // Company Admin "my company" state
   const [myCompany, setMyCompany] = useState(null);
   const [myCompanyLoading, setMyCompanyLoading] = useState(true);
@@ -47,6 +56,8 @@ function CompaniesPage() {
   const [myCompanySubmitting, setMyCompanySubmitting] = useState(false);
   const [myCompanySaveError, setMyCompanySaveError] = useState("");
   const [myCompanySaved, setMyCompanySaved] = useState(false);
+  const [pendingRequest, setPendingRequest] = useState(null);
+  const [pendingRequestLoading, setPendingRequestLoading] = useState(true);
 
   async function loadCompanies() {
     if (!isSuperAdmin) {
@@ -90,9 +101,45 @@ function CompaniesPage() {
     }
   }
 
+  async function loadPendingRequest() {
+    if (!isCompanyAdmin) {
+      setPendingRequestLoading(false);
+      return;
+    }
+    setPendingRequestLoading(true);
+    try {
+      const data = await getPendingForCompany(user.companyId);
+      setPendingRequest(data);
+    } catch (err) {
+      // Non-fatal: if this fails, the form just behaves as if there's no pending request.
+      setPendingRequest(null);
+    } finally {
+      setPendingRequestLoading(false);
+    }
+  }
+
+  async function loadPendingChangeRequests() {
+    if (!isSuperAdmin) {
+      setPendingRequestsLoading(false);
+      return;
+    }
+    setPendingRequestsLoading(true);
+    try {
+      const data = await listPendingChangeRequests();
+      setPendingChangeRequests(data);
+      setPendingRequestsError("");
+    } catch (err) {
+      setPendingRequestsError(err.response?.data?.error?.message || "Failed to load pending requests.");
+    } finally {
+      setPendingRequestsLoading(false);
+    }
+  }
+
   useEffect(() => {
     loadCompanies();
     loadMyCompany();
+    loadPendingRequest();
+    loadPendingChangeRequests();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -116,6 +163,53 @@ function CompaniesPage() {
       setFormError(err.response?.data?.error?.message || "Failed to create company.");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  function companyNameFor(companyId) {
+    const match = companies.find((c) => c._id === companyId);
+    return match ? match.companyName : companyId;
+  }
+
+  function companyById(companyId) {
+    return companies.find((c) => c._id === companyId) || null;
+  }
+
+  function startReview(request) {
+    setReviewingRequest(request);
+    setReviewError("");
+  }
+
+  function cancelReview() {
+    setReviewingRequest(null);
+    setReviewError("");
+  }
+
+  async function handleApproveRequest() {
+    setReviewError("");
+    setReviewSubmitting(true);
+    try {
+      await approveChangeRequest(reviewingRequest._id);
+      setReviewingRequest(null);
+      await Promise.all([loadPendingChangeRequests(), loadCompanies()]);
+    } catch (err) {
+      setReviewError(err.response?.data?.error?.message || "Failed to approve request.");
+    } finally {
+      setReviewSubmitting(false);
+    }
+  }
+
+  async function handleRejectRequest() {
+    setReviewError("");
+    setReviewSubmitting(true);
+    try {
+      await rejectChangeRequest(reviewingRequest._id);
+      setReviewingRequest(null);
+      await loadPendingChangeRequests();
+    } catch (err) {
+      setReviewError(err.response?.data?.error?.message || "Failed to reject request.");
+    } finally {
+      setReviewSubmitting(false);
     }
   }
 
@@ -171,11 +265,11 @@ function CompaniesPage() {
     setMyCompanySaved(false);
     setMyCompanySubmitting(true);
     try {
-      const updated = await updateCompany(user.companyId, myCompanyForm);
-      setMyCompany(updated);
+      await updateCompany(user.companyId, myCompanyForm);
       setMyCompanySaved(true);
+      await loadPendingRequest();
     } catch (err) {
-      setMyCompanySaveError(err.response?.data?.error?.message || "Failed to update company.");
+      setMyCompanySaveError(err.response?.data?.error?.message || "Failed to submit change request.");
     } finally {
       setMyCompanySubmitting(false);
     }
@@ -197,75 +291,96 @@ function CompaniesPage() {
               <span>{myCompany?.status}</span>
             </div>
 
-            <form onSubmit={handleSaveMyCompany}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
-                <div>
-                  <label style={labelStyle}>Company Name</label>
-                  <input
-                    style={inputStyle}
-                    value={myCompanyForm.companyName}
-                    onChange={(e) => updateMyCompanyField("companyName", e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label style={labelStyle}>Legal Company Name</label>
-                  <input
-                    style={inputStyle}
-                    value={myCompanyForm.legalCompanyName}
-                    onChange={(e) => updateMyCompanyField("legalCompanyName", e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label style={labelStyle}>Company Type</label>
-                  <input
-                    style={inputStyle}
-                    value={myCompanyForm.companyType}
-                    onChange={(e) => updateMyCompanyField("companyType", e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label style={labelStyle}>Website</label>
-                  <input
-                    style={inputStyle}
-                    value={myCompanyForm.website}
-                    onChange={(e) => updateMyCompanyField("website", e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label style={labelStyle}>Email</label>
-                  <input
-                    style={inputStyle}
-                    type="email"
-                    value={myCompanyForm.email}
-                    onChange={(e) => updateMyCompanyField("email", e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label style={labelStyle}>Phone Number</label>
-                  <input
-                    style={inputStyle}
-                    value={myCompanyForm.phoneNumber}
-                    onChange={(e) => updateMyCompanyField("phoneNumber", e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-
-              {myCompanySaveError && <p style={{ color: "var(--color-danger)" }}>{myCompanySaveError}</p>}
-              {myCompanySaved && <p style={{ color: "var(--color-primary)" }}>Saved.</p>}
-
-              <button
-                type="submit"
-                disabled={myCompanySubmitting}
-                style={{ padding: "10px 20px", border: "none", borderRadius: 999, background: "var(--color-primary)", color: "#fff", cursor: "pointer" }}
+            {pendingRequest && (
+              <div
+                style={{
+                  background: "#FFF7E6",
+                  border: "1px solid #F0C36D",
+                  borderRadius: 6,
+                  padding: "12px 16px",
+                  marginBottom: 20,
+                  fontSize: 13,
+                }}
               >
-                {myCompanySubmitting ? "Saving..." : "Save Changes"}
-              </button>
+                <strong>Pending approval:</strong> you have a change request awaiting Super Admin review. You
+                can't submit another change until this one is approved or rejected.
+              </div>
+            )}
+
+            <form onSubmit={handleSaveMyCompany}>
+              <fieldset
+                disabled={!!pendingRequest || pendingRequestLoading}
+                style={{ border: "none", padding: 0, margin: 0 }}
+              >
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+                  <div>
+                    <label style={labelStyle}>Company Name</label>
+                    <input
+                      style={inputStyle}
+                      value={myCompanyForm.companyName}
+                      onChange={(e) => updateMyCompanyField("companyName", e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Legal Company Name</label>
+                    <input
+                      style={inputStyle}
+                      value={myCompanyForm.legalCompanyName}
+                      onChange={(e) => updateMyCompanyField("legalCompanyName", e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Company Type</label>
+                    <input
+                      style={inputStyle}
+                      value={myCompanyForm.companyType}
+                      onChange={(e) => updateMyCompanyField("companyType", e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Website</label>
+                    <input
+                      style={inputStyle}
+                      value={myCompanyForm.website}
+                      onChange={(e) => updateMyCompanyField("website", e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Email</label>
+                    <input
+                      style={inputStyle}
+                      type="email"
+                      value={myCompanyForm.email}
+                      onChange={(e) => updateMyCompanyField("email", e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Phone Number</label>
+                    <input
+                      style={inputStyle}
+                      value={myCompanyForm.phoneNumber}
+                      onChange={(e) => updateMyCompanyField("phoneNumber", e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+
+                {myCompanySaveError && <p style={{ color: "var(--color-danger)" }}>{myCompanySaveError}</p>}
+                {myCompanySaved && <p style={{ color: "var(--color-primary)" }}>Submitted for Super Admin approval.</p>}
+
+                <button
+                  type="submit"
+                  disabled={myCompanySubmitting || !!pendingRequest || pendingRequestLoading}
+                  style={{ padding: "10px 20px", border: "none", borderRadius: 999, background: "var(--color-primary)", color: "#fff", cursor: "pointer" }}
+                >
+                  {myCompanySubmitting ? "Submitting..." : "Submit for Approval"}
+                </button>
+              </fieldset>
             </form>
           </div>
         )}
@@ -331,6 +446,109 @@ function CompaniesPage() {
             )}
           </tbody>
         </table>
+        </div>
+      )}
+
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8 }}>
+        <h3 style={{ margin: 0 }}>Pending Requests</h3>
+      </div>
+
+      {pendingRequestsLoading && <p>Loading...</p>}
+      {pendingRequestsError && <p style={{ color: "var(--color-danger)" }}>{pendingRequestsError}</p>}
+
+      {!pendingRequestsLoading && !pendingRequestsError && (
+        <div style={{ maxHeight: 240, overflowY: "auto", border: "1px solid var(--color-border)", marginBottom: 24, marginTop: 12 }}>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ textAlign: "left", borderBottom: "1px solid var(--color-border)", position: "sticky", top: 0, background: "var(--color-card)" }}>
+                <th style={{ padding: 8 }}>Company ID</th>
+                <th style={{ padding: 8 }}>Company Name</th>
+                <th style={{ padding: 8 }}>Requested On</th>
+                <th style={{ padding: 8 }}></th>
+              </tr>
+            </thead>
+            <tbody>
+              {pendingChangeRequests.map((r) => (
+                <tr key={r._id} style={{ borderBottom: "1px solid var(--color-border)" }}>
+                  <td style={{ padding: 8, fontFamily: "monospace", fontSize: 12 }}>{r.companyId}</td>
+                  <td style={{ padding: 8 }}>{companyNameFor(r.companyId)}</td>
+                  <td style={{ padding: 8 }}>{new Date(r.createdAt).toLocaleString()}</td>
+                  <td style={{ padding: 8 }}>
+                    <button onClick={() => startReview(r)} style={iconBtnStyle} title="Review">
+                      <Pencil size={18} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {pendingChangeRequests.length === 0 && (
+                <tr>
+                  <td colSpan={4} style={{ padding: 8, color: "var(--color-text-muted)" }}>
+                    No pending requests.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {reviewingRequest && (
+        <div style={{ marginTop: 12, borderTop: "1px solid var(--color-border)", paddingTop: 20, maxWidth: 700, marginLeft: "auto", marginRight: "auto", marginBottom: 32 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <h3 style={{ margin: 0 }}>Review Request: {companyNameFor(reviewingRequest.companyId)}</h3>
+            <button onClick={cancelReview} style={iconBtnStyle} title="Cancel">
+              <X size={20} />
+            </button>
+          </div>
+
+          <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 16 }}>
+            <thead>
+              <tr style={{ textAlign: "left", borderBottom: "1px solid var(--color-border)" }}>
+                <th style={{ padding: 8 }}>Field</th>
+                <th style={{ padding: 8 }}>Current</th>
+                <th style={{ padding: 8 }}>Proposed</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(reviewingRequest.proposedChanges).map(([field, newValue]) => {
+                const current = companyById(reviewingRequest.companyId);
+                return (
+                  <tr key={field} style={{ borderBottom: "1px solid var(--color-border)" }}>
+                    <td style={{ padding: 8, fontWeight: 600 }}>{field}</td>
+                    <td style={{ padding: 8, color: "var(--color-text-muted)" }}>{current ? current[field] : "—"}</td>
+                    <td style={{ padding: 8 }}>{newValue}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+
+          {reviewError && <p style={{ color: "var(--color-danger)" }}>{reviewError}</p>}
+
+          <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+            <button
+              onClick={handleApproveRequest}
+              disabled={reviewSubmitting}
+              style={{ padding: "10px 20px", border: "none", borderRadius: 999, background: "var(--color-primary)", color: "#fff", cursor: "pointer" }}
+            >
+              {reviewSubmitting ? "Working..." : "Approve"}
+            </button>
+            <button
+              onClick={handleRejectRequest}
+              disabled={reviewSubmitting}
+              style={{ padding: "10px 20px", border: "1px solid var(--color-danger)", borderRadius: 999, background: "#fff", color: "var(--color-danger)", cursor: "pointer" }}
+            >
+              Reject
+            </button>
+            <button
+              type="button"
+              onClick={cancelReview}
+              disabled={reviewSubmitting}
+              style={{ padding: "10px 20px", border: "1px solid var(--color-border)", borderRadius: 999, background: "#fff", cursor: "pointer" }}
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       )}
 
