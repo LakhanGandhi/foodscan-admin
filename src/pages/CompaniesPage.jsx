@@ -3,6 +3,7 @@ import { Plus, Pencil, X } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import { listCompanies, getCompany, createCompany, updateCompany, changeCompanyStatus } from "../api/companies";
 import { getPendingForCompany, listPendingChangeRequests, approveChangeRequest, rejectChangeRequest } from "../api/changeRequests";
+import "../styles/shared.css";
 
 const emptyForm = {
   companyName: "",
@@ -16,9 +17,26 @@ const emptyForm = {
 };
 
 const STATUS_OPTIONS = ["pending", "approved", "disabled", "suspended"];
-const inputStyle = { width: "100%", padding: 8, marginTop: 4, marginBottom: 12 };
-const labelStyle = { fontSize: 13, fontWeight: 600 };
-const iconBtnStyle = { border: "none", background: "none", cursor: "pointer", color: "var(--color-primary)" };
+
+// Status -> pill color. Reserved vocabulary: success = approved,
+// warning = pending, danger = suspended (serious block), neutral = disabled
+// (deliberately turned off, not alarming).
+function statusVariant(status) {
+  switch (status) {
+    case "approved":
+      return "success";
+    case "pending":
+      return "warning";
+    case "suspended":
+      return "danger";
+    default:
+      return "neutral";
+  }
+}
+
+function StatusPill({ status }) {
+  return <span className={`status-pill status-pill--${statusVariant(status)}`}>{status}</span>;
+}
 
 function CompaniesPage() {
   const { user } = useAuth();
@@ -282,26 +300,17 @@ function CompaniesPage() {
         <h2 style={{ margin: 0 }}>My Company</h2>
 
         {myCompanyLoading && <p>Loading...</p>}
-        {myCompanyError && <p style={{ color: "var(--color-danger)" }}>{myCompanyError}</p>}
+        {myCompanyError && <p className="alert-banner--danger">{myCompanyError}</p>}
 
         {!myCompanyLoading && !myCompanyError && myCompanyForm && (
           <div style={{ marginTop: 20, maxWidth: 700 }}>
-            <div style={{ marginBottom: 16, fontSize: 13 }}>
-              <span style={{ fontWeight: 600 }}>Status: </span>
-              <span>{myCompany?.status}</span>
+            <div style={{ marginBottom: 16, display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
+              <span style={{ fontWeight: 600 }}>Status:</span>
+              {myCompany?.status && <StatusPill status={myCompany.status} />}
             </div>
 
             {pendingRequest && (
-              <div
-                style={{
-                  background: "#FFF7E6",
-                  border: "1px solid #F0C36D",
-                  borderRadius: 6,
-                  padding: "12px 16px",
-                  marginBottom: 20,
-                  fontSize: 13,
-                }}
-              >
+              <div className="alert-banner alert-banner--warning">
                 <strong>Pending approval:</strong> you have a change request awaiting Super Admin review. You
                 can't submit another change until this one is approved or rejected.
               </div>
@@ -314,45 +323,45 @@ function CompaniesPage() {
               >
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
                   <div>
-                    <label style={labelStyle}>Company Name</label>
+                    <label className="field-label">Company Name</label>
                     <input
-                      style={inputStyle}
+                      className="field-input"
                       value={myCompanyForm.companyName}
                       onChange={(e) => updateMyCompanyField("companyName", e.target.value)}
                       required
                     />
                   </div>
                   <div>
-                    <label style={labelStyle}>Legal Company Name</label>
+                    <label className="field-label">Legal Company Name</label>
                     <input
-                      style={inputStyle}
+                      className="field-input"
                       value={myCompanyForm.legalCompanyName}
                       onChange={(e) => updateMyCompanyField("legalCompanyName", e.target.value)}
                       required
                     />
                   </div>
                   <div>
-                    <label style={labelStyle}>Company Type</label>
+                    <label className="field-label">Company Type</label>
                     <input
-                      style={inputStyle}
+                      className="field-input"
                       value={myCompanyForm.companyType}
                       onChange={(e) => updateMyCompanyField("companyType", e.target.value)}
                       required
                     />
                   </div>
                   <div>
-                    <label style={labelStyle}>Website</label>
+                    <label className="field-label">Website</label>
                     <input
-                      style={inputStyle}
+                      className="field-input"
                       value={myCompanyForm.website}
                       onChange={(e) => updateMyCompanyField("website", e.target.value)}
                       required
                     />
                   </div>
                   <div>
-                    <label style={labelStyle}>Email</label>
+                    <label className="field-label">Email</label>
                     <input
-                      style={inputStyle}
+                      className="field-input"
                       type="email"
                       value={myCompanyForm.email}
                       onChange={(e) => updateMyCompanyField("email", e.target.value)}
@@ -360,9 +369,9 @@ function CompaniesPage() {
                     />
                   </div>
                   <div>
-                    <label style={labelStyle}>Phone Number</label>
+                    <label className="field-label">Phone Number</label>
                     <input
-                      style={inputStyle}
+                      className="field-input"
                       value={myCompanyForm.phoneNumber}
                       onChange={(e) => updateMyCompanyField("phoneNumber", e.target.value)}
                       required
@@ -370,13 +379,13 @@ function CompaniesPage() {
                   </div>
                 </div>
 
-                {myCompanySaveError && <p style={{ color: "var(--color-danger)" }}>{myCompanySaveError}</p>}
-                {myCompanySaved && <p style={{ color: "var(--color-primary)" }}>Submitted for Super Admin approval.</p>}
+                {myCompanySaveError && <p className="alert-banner--danger">{myCompanySaveError}</p>}
+                {myCompanySaved && <p className="alert-banner--success">Submitted for Super Admin approval.</p>}
 
                 <button
                   type="submit"
                   disabled={myCompanySubmitting || !!pendingRequest || pendingRequestLoading}
-                  style={{ padding: "10px 20px", border: "none", borderRadius: 999, background: "var(--color-primary)", color: "#fff", cursor: "pointer" }}
+                  className="btn btn--primary"
                 >
                   {myCompanySubmitting ? "Submitting..." : "Submit for Approval"}
                 </button>
@@ -401,51 +410,51 @@ function CompaniesPage() {
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <h2 style={{ margin: 0 }}>Companies</h2>
-        <button onClick={() => setShowAddForm((v) => !v)} style={iconBtnStyle} title="Add Company">
+        <button onClick={() => setShowAddForm((v) => !v)} className="icon-btn" title="Add Company">
           <Plus size={22} />
         </button>
       </div>
 
       {loading && <p>Loading...</p>}
-      {error && <p style={{ color: "var(--color-danger)" }}>{error}</p>}
+      {error && <p className="alert-banner--danger">{error}</p>}
 
       {!loading && !error && (
-        <div style={{ maxHeight: 240, overflowY: "auto", border: "1px solid var(--color-border)", marginBottom: 24 }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ textAlign: "left", borderBottom: "1px solid var(--color-border)", position: "sticky", top: 0, background: "var(--color-card)" }}>
-              <th style={{ padding: 8 }}>ID</th>
-              <th style={{ padding: 8 }}>Name</th>
-              <th style={{ padding: 8 }}>Legal Name</th>
-              <th style={{ padding: 8 }}>GST</th>
-              <th style={{ padding: 8 }}>Status</th>
-              <th style={{ padding: 8 }}></th>
-            </tr>
-          </thead>
-          <tbody>
-            {companies.map((c) => (
-              <tr key={c._id} style={{ borderBottom: "1px solid var(--color-border)" }}>
-                <td style={{ padding: 8, fontFamily: "monospace", fontSize: 12 }}>{c._id}</td>
-                <td style={{ padding: 8 }}>{c.companyName}</td>
-                <td style={{ padding: 8 }}>{c.legalCompanyName}</td>
-                <td style={{ padding: 8 }}>{c.gstNumber}</td>
-                <td style={{ padding: 8 }}>{c.status}</td>
-                <td style={{ padding: 8 }}>
-                  <button onClick={() => startEdit(c)} style={iconBtnStyle} title="Edit">
-                    <Pencil size={18} />
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {companies.length === 0 && (
+        <div className="table-wrapper">
+          <table className="data-table">
+            <thead>
               <tr>
-                <td colSpan={6} style={{ padding: 8, color: "var(--color-text-muted)" }}>
-                  No companies yet.
-                </td>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Legal Name</th>
+                <th>GST</th>
+                <th>Status</th>
+                <th></th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {companies.map((c) => (
+                <tr key={c._id}>
+                  <td className="id-cell">{c._id}</td>
+                  <td>{c.companyName}</td>
+                  <td>{c.legalCompanyName}</td>
+                  <td>{c.gstNumber}</td>
+                  <td>
+                    <StatusPill status={c.status} />
+                  </td>
+                  <td>
+                    <button onClick={() => startEdit(c)} className="icon-btn" title="Edit">
+                      <Pencil size={18} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {companies.length === 0 && (
+                <tr className="empty-row">
+                  <td colSpan={6}>No companies yet.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       )}
 
@@ -454,37 +463,35 @@ function CompaniesPage() {
       </div>
 
       {pendingRequestsLoading && <p>Loading...</p>}
-      {pendingRequestsError && <p style={{ color: "var(--color-danger)" }}>{pendingRequestsError}</p>}
+      {pendingRequestsError && <p className="alert-banner--danger">{pendingRequestsError}</p>}
 
       {!pendingRequestsLoading && !pendingRequestsError && (
-        <div style={{ maxHeight: 240, overflowY: "auto", border: "1px solid var(--color-border)", marginBottom: 24, marginTop: 12 }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <div className="table-wrapper" style={{ marginTop: 12 }}>
+          <table className="data-table">
             <thead>
-              <tr style={{ textAlign: "left", borderBottom: "1px solid var(--color-border)", position: "sticky", top: 0, background: "var(--color-card)" }}>
-                <th style={{ padding: 8 }}>Company ID</th>
-                <th style={{ padding: 8 }}>Company Name</th>
-                <th style={{ padding: 8 }}>Requested On</th>
-                <th style={{ padding: 8 }}></th>
+              <tr>
+                <th>Company ID</th>
+                <th>Company Name</th>
+                <th>Requested On</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
               {pendingChangeRequests.map((r) => (
-                <tr key={r._id} style={{ borderBottom: "1px solid var(--color-border)" }}>
-                  <td style={{ padding: 8, fontFamily: "monospace", fontSize: 12 }}>{r.companyId}</td>
-                  <td style={{ padding: 8 }}>{companyNameFor(r.companyId)}</td>
-                  <td style={{ padding: 8 }}>{new Date(r.createdAt).toLocaleString()}</td>
-                  <td style={{ padding: 8 }}>
-                    <button onClick={() => startReview(r)} style={iconBtnStyle} title="Review">
+                <tr key={r._id}>
+                  <td className="id-cell">{r.companyId}</td>
+                  <td>{companyNameFor(r.companyId)}</td>
+                  <td className="tabular-nums">{new Date(r.createdAt).toLocaleString()}</td>
+                  <td>
+                    <button onClick={() => startReview(r)} className="icon-btn" title="Review">
                       <Pencil size={18} />
                     </button>
                   </td>
                 </tr>
               ))}
               {pendingChangeRequests.length === 0 && (
-                <tr>
-                  <td colSpan={4} style={{ padding: 8, color: "var(--color-text-muted)" }}>
-                    No pending requests.
-                  </td>
+                <tr className="empty-row">
+                  <td colSpan={4}>No pending requests.</td>
                 </tr>
               )}
             </tbody>
@@ -496,56 +503,43 @@ function CompaniesPage() {
         <div style={{ marginTop: 12, borderTop: "1px solid var(--color-border)", paddingTop: 20, maxWidth: 700, marginLeft: "auto", marginRight: "auto", marginBottom: 32 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <h3 style={{ margin: 0 }}>Review Request: {companyNameFor(reviewingRequest.companyId)}</h3>
-            <button onClick={cancelReview} style={iconBtnStyle} title="Cancel">
+            <button onClick={cancelReview} className="icon-btn" title="Cancel">
               <X size={20} />
             </button>
           </div>
 
-          <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 16 }}>
+          <table className="data-table diff-table" style={{ marginTop: 16 }}>
             <thead>
-              <tr style={{ textAlign: "left", borderBottom: "1px solid var(--color-border)" }}>
-                <th style={{ padding: 8 }}>Field</th>
-                <th style={{ padding: 8 }}>Current</th>
-                <th style={{ padding: 8 }}>Proposed</th>
+              <tr>
+                <th>Field</th>
+                <th>Current</th>
+                <th>Proposed</th>
               </tr>
             </thead>
             <tbody>
               {Object.entries(reviewingRequest.proposedChanges).map(([field, newValue]) => {
                 const current = companyById(reviewingRequest.companyId);
                 return (
-                  <tr key={field} style={{ borderBottom: "1px solid var(--color-border)" }}>
-                    <td style={{ padding: 8, fontWeight: 600 }}>{field}</td>
-                    <td style={{ padding: 8, color: "var(--color-text-muted)" }}>{current ? current[field] : "—"}</td>
-                    <td style={{ padding: 8 }}>{newValue}</td>
+                  <tr key={field}>
+                    <td style={{ fontWeight: 600 }}>{field}</td>
+                    <td className="diff-current">{current ? current[field] : "—"}</td>
+                    <td className="diff-proposed">{newValue}</td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
 
-          {reviewError && <p style={{ color: "var(--color-danger)" }}>{reviewError}</p>}
+          {reviewError && <p className="alert-banner--danger">{reviewError}</p>}
 
           <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-            <button
-              onClick={handleApproveRequest}
-              disabled={reviewSubmitting}
-              style={{ padding: "10px 20px", border: "none", borderRadius: 999, background: "var(--color-primary)", color: "#fff", cursor: "pointer" }}
-            >
+            <button onClick={handleApproveRequest} disabled={reviewSubmitting} className="btn btn--success">
               {reviewSubmitting ? "Working..." : "Approve"}
             </button>
-            <button
-              onClick={handleRejectRequest}
-              disabled={reviewSubmitting}
-              style={{ padding: "10px 20px", border: "1px solid var(--color-danger)", borderRadius: 999, background: "#fff", color: "var(--color-danger)", cursor: "pointer" }}
-            >
+            <button onClick={handleRejectRequest} disabled={reviewSubmitting} className="btn btn--danger-outline">
               Reject
             </button>
-            <button
-              type="button"
-              onClick={cancelReview}
-              disabled={reviewSubmitting}
-              style={{ padding: "10px 20px", border: "1px solid var(--color-border)", borderRadius: 999, background: "#fff", cursor: "pointer" }}
-            >
+            <button type="button" onClick={cancelReview} disabled={reviewSubmitting} className="btn btn--neutral-outline">
               Cancel
             </button>
           </div>
@@ -558,58 +552,58 @@ function CompaniesPage() {
           <form onSubmit={handleCreate} style={{ maxWidth: 700, margin: "0 auto" }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
               <div>
-                <label style={labelStyle}>Company Name</label>
-                <input style={inputStyle} value={form.companyName} onChange={(e) => updateField("companyName", e.target.value)} required />
+                <label className="field-label">Company Name</label>
+                <input className="field-input" value={form.companyName} onChange={(e) => updateField("companyName", e.target.value)} required />
               </div>
               <div>
-                <label style={labelStyle}>Legal Company Name</label>
-                <input style={inputStyle} value={form.legalCompanyName} onChange={(e) => updateField("legalCompanyName", e.target.value)} required />
+                <label className="field-label">Legal Company Name</label>
+                <input className="field-input" value={form.legalCompanyName} onChange={(e) => updateField("legalCompanyName", e.target.value)} required />
               </div>
               <div>
-                <label style={labelStyle}>Company Type</label>
-                <input style={inputStyle} value={form.companyType} onChange={(e) => updateField("companyType", e.target.value)} required />
+                <label className="field-label">Company Type</label>
+                <input className="field-input" value={form.companyType} onChange={(e) => updateField("companyType", e.target.value)} required />
               </div>
               <div>
-                <label style={labelStyle}>GST Number</label>
-                <input style={inputStyle} value={form.gstNumber} onChange={(e) => updateField("gstNumber", e.target.value)} required />
+                <label className="field-label">GST Number</label>
+                <input className="field-input" value={form.gstNumber} onChange={(e) => updateField("gstNumber", e.target.value)} required />
               </div>
               <div>
-                <label style={labelStyle}>Website</label>
-                <input style={inputStyle} value={form.website} onChange={(e) => updateField("website", e.target.value)} required />
+                <label className="field-label">Website</label>
+                <input className="field-input" value={form.website} onChange={(e) => updateField("website", e.target.value)} required />
               </div>
               <div>
-                <label style={labelStyle}>Email</label>
-                <input style={inputStyle} type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)} required />
+                <label className="field-label">Email</label>
+                <input className="field-input" type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)} required />
               </div>
               <div>
-                <label style={labelStyle}>Phone Number</label>
-                <input style={inputStyle} value={form.phoneNumber} onChange={(e) => updateField("phoneNumber", e.target.value)} required />
+                <label className="field-label">Phone Number</label>
+                <input className="field-input" value={form.phoneNumber} onChange={(e) => updateField("phoneNumber", e.target.value)} required />
               </div>
               <div>
-                <label style={labelStyle}>Address Line 1</label>
-                <input style={inputStyle} value={form.address.line1} onChange={(e) => updateAddressField("line1", e.target.value)} required />
+                <label className="field-label">Address Line 1</label>
+                <input className="field-input" value={form.address.line1} onChange={(e) => updateAddressField("line1", e.target.value)} required />
               </div>
               <div>
-                <label style={labelStyle}>City</label>
-                <input style={inputStyle} value={form.address.city} onChange={(e) => updateAddressField("city", e.target.value)} required />
+                <label className="field-label">City</label>
+                <input className="field-input" value={form.address.city} onChange={(e) => updateAddressField("city", e.target.value)} required />
               </div>
               <div>
-                <label style={labelStyle}>State</label>
-                <input style={inputStyle} value={form.address.state} onChange={(e) => updateAddressField("state", e.target.value)} required />
+                <label className="field-label">State</label>
+                <input className="field-input" value={form.address.state} onChange={(e) => updateAddressField("state", e.target.value)} required />
               </div>
               <div>
-                <label style={labelStyle}>Country</label>
-                <input style={inputStyle} value={form.address.country} onChange={(e) => updateAddressField("country", e.target.value)} required />
+                <label className="field-label">Country</label>
+                <input className="field-input" value={form.address.country} onChange={(e) => updateAddressField("country", e.target.value)} required />
               </div>
               <div>
-                <label style={labelStyle}>PIN Code</label>
-                <input style={inputStyle} value={form.address.pinCode} onChange={(e) => updateAddressField("pinCode", e.target.value)} required />
+                <label className="field-label">PIN Code</label>
+                <input className="field-input" value={form.address.pinCode} onChange={(e) => updateAddressField("pinCode", e.target.value)} required />
               </div>
             </div>
 
-            {formError && <p style={{ color: "var(--color-danger)" }}>{formError}</p>}
+            {formError && <p className="alert-banner--danger">{formError}</p>}
             <div style={{ display: "flex", gap: 10 }}>
-              <button type="submit" disabled={submitting} style={{ padding: "10px 20px", border: "none", borderRadius: 999, background: "var(--color-primary)", color: "#fff", cursor: "pointer" }}>
+              <button type="submit" disabled={submitting} className="btn btn--primary">
                 {submitting ? "Creating..." : "Create Company"}
               </button>
               <button
@@ -619,7 +613,7 @@ function CompaniesPage() {
                   setFormError("");
                   setShowAddForm(false);
                 }}
-                style={{ padding: "10px 20px", border: "1px solid var(--color-border)", borderRadius: 999, background: "#fff", cursor: "pointer" }}
+                className="btn btn--neutral-outline"
               >
                 Cancel
               </button>
@@ -632,40 +626,40 @@ function CompaniesPage() {
         <div style={{ marginTop: 32, borderTop: "1px solid var(--color-border)", paddingTop: 20, maxWidth: 700, marginLeft: "auto", marginRight: "auto" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <h3 style={{ margin: 0 }}>Edit: {editingCompany.companyName}</h3>
-            <button onClick={cancelEdit} style={iconBtnStyle} title="Cancel">
+            <button onClick={cancelEdit} className="icon-btn" title="Cancel">
               <X size={20} />
             </button>
           </div>
           <form onSubmit={handleSaveEdit}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
               <div>
-                <label style={labelStyle}>Company Name</label>
-                <input style={inputStyle} value={editForm.companyName} onChange={(e) => updateEditField("companyName", e.target.value)} required />
+                <label className="field-label">Company Name</label>
+                <input className="field-input" value={editForm.companyName} onChange={(e) => updateEditField("companyName", e.target.value)} required />
               </div>
               <div>
-                <label style={labelStyle}>Legal Company Name</label>
-                <input style={inputStyle} value={editForm.legalCompanyName} onChange={(e) => updateEditField("legalCompanyName", e.target.value)} required />
+                <label className="field-label">Legal Company Name</label>
+                <input className="field-input" value={editForm.legalCompanyName} onChange={(e) => updateEditField("legalCompanyName", e.target.value)} required />
               </div>
               <div>
-                <label style={labelStyle}>Company Type</label>
-                <input style={inputStyle} value={editForm.companyType} onChange={(e) => updateEditField("companyType", e.target.value)} required />
+                <label className="field-label">Company Type</label>
+                <input className="field-input" value={editForm.companyType} onChange={(e) => updateEditField("companyType", e.target.value)} required />
               </div>
               <div>
-                <label style={labelStyle}>Website</label>
-                <input style={inputStyle} value={editForm.website} onChange={(e) => updateEditField("website", e.target.value)} required />
+                <label className="field-label">Website</label>
+                <input className="field-input" value={editForm.website} onChange={(e) => updateEditField("website", e.target.value)} required />
               </div>
               <div>
-                <label style={labelStyle}>Email</label>
-                <input style={inputStyle} type="email" value={editForm.email} onChange={(e) => updateEditField("email", e.target.value)} required />
+                <label className="field-label">Email</label>
+                <input className="field-input" type="email" value={editForm.email} onChange={(e) => updateEditField("email", e.target.value)} required />
               </div>
               <div>
-                <label style={labelStyle}>Phone Number</label>
-                <input style={inputStyle} value={editForm.phoneNumber} onChange={(e) => updateEditField("phoneNumber", e.target.value)} required />
+                <label className="field-label">Phone Number</label>
+                <input className="field-input" value={editForm.phoneNumber} onChange={(e) => updateEditField("phoneNumber", e.target.value)} required />
               </div>
             </div>
 
-            <label style={labelStyle}>Status</label>
-            <select style={inputStyle} value={editStatus} onChange={(e) => setEditStatus(e.target.value)}>
+            <label className="field-label">Status</label>
+            <select className="field-input" value={editStatus} onChange={(e) => setEditStatus(e.target.value)}>
               {STATUS_OPTIONS.map((s) => (
                 <option key={s} value={s}>
                   {s}
@@ -673,8 +667,8 @@ function CompaniesPage() {
               ))}
             </select>
 
-            {editError && <p style={{ color: "var(--color-danger)" }}>{editError}</p>}
-            <button type="submit" disabled={editSubmitting} style={{ padding: "10px 20px", border: "none", borderRadius: 999, background: "var(--color-primary)", color: "#fff", cursor: "pointer" }}>
+            {editError && <p className="alert-banner--danger">{editError}</p>}
+            <button type="submit" disabled={editSubmitting} className="btn btn--primary">
               {editSubmitting ? "Saving..." : "Save Changes"}
             </button>
           </form>

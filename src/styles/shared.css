@@ -1,0 +1,237 @@
+/* ===========================================================
+   SHARED PAGE COMPONENTS
+   Used by every list+create+edit page (Companies, Brands, Plants,
+   Products, Employees, Batches). Centralizing these means a palette
+   or spacing change only has to happen once.
+=========================================================== */
+
+/* --- Data table shell ------------------------------------- */
+.table-wrapper {
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.data-table thead tr {
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  background: var(--color-card);
+}
+
+.data-table th {
+  padding: 10px 12px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.data-table td {
+  padding: 10px 12px;
+}
+
+.data-table tbody tr {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.data-table tbody tr:hover {
+  background: var(--color-primary-soft);
+}
+
+.data-table .id-cell {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.data-table .empty-row td {
+  padding: 16px 12px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* --- Status pills -------------------------------------------
+   Reserved vocabulary — do not use these colors decoratively
+   anywhere else. success = approved/confirmed, warning = pending/
+   attention, danger = suspended/recalled/expired, neutral = inactive
+   but not alarming (e.g. disabled).
+--------------------------------------------------------------- */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.status-pill--success {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.status-pill--warning {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+
+.status-pill--danger {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.status-pill--neutral {
+  background: var(--color-border);
+  color: var(--color-text-muted);
+}
+
+/* --- Inline alert banners ----------------------------------- */
+.alert-banner {
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  border: 1px solid transparent;
+}
+
+.alert-banner--warning {
+  background: var(--color-warning-soft);
+  border-color: var(--color-warning);
+  color: var(--color-text);
+}
+
+.alert-banner--success {
+  color: var(--color-success);
+  font-size: 13px;
+}
+
+.alert-banner--danger {
+  color: var(--color-danger);
+  font-size: 13px;
+}
+
+/* --- Form fields ---------------------------------------------- */
+.field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+  margin: 0 0 4px;
+}
+
+.field-input {
+  width: 100%;
+  padding: 9px 12px;
+  margin-bottom: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text);
+  background: var(--color-card);
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.field-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+
+/* --- Buttons ---------------------------------------------------
+   primary  -> neutral primary actions (create, save, submit)
+   success  -> approving / confirming someone else's request
+   danger   -> destructive or rejecting actions
+   neutral  -> cancel / secondary actions
+------------------------------------------------------------------ */
+.btn {
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.btn--primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+.btn--primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.btn--success {
+  background: var(--color-success);
+  color: #fff;
+}
+.btn--success:hover:not(:disabled) {
+  background: #2E5F47;
+}
+
+.btn--danger-outline {
+  background: var(--color-card);
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+.btn--danger-outline:hover:not(:disabled) {
+  background: var(--color-danger-soft);
+}
+
+.btn--neutral-outline {
+  background: var(--color-card);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+.btn--neutral-outline:hover:not(:disabled) {
+  background: var(--color-bg);
+}
+
+.icon-btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--color-primary);
+  display: inline-flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: var(--radius);
+}
+.icon-btn:hover {
+  background: var(--color-primary-soft);
+}
+
+/* --- Diff review table (change requests) -----------------------
+   Proposed values get a success-tinted highlight (the incoming
+   state), matching the familiar "green = new" diff convention.
+------------------------------------------------------------------ */
+.diff-table td.diff-current {
+  color: var(--color-text-muted);
+}
+
+.diff-table td.diff-proposed {
+  background: var(--color-success-soft);
+  color: var(--color-text);
+  border-radius: var(--radius);
+}
