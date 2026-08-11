@@ -5,7 +5,7 @@
 
 .login-left {
   flex: 1.2;
-  background: var(--color-bg);
+  background: var(--color-card);
   display: flex;
   flex-direction: column;
   justify-content: center;
