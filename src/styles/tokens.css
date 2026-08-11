@@ -1,20 +1,52 @@
 :root {
-  /* Facebook-style palette */
-  --color-primary: #1877F2;
-  --color-primary-hover: #145DBF;
-  --color-bg: #F0F2F5;
-  --color-card: #FFFFFF;
-  --color-text: #1C1E21;
-  --color-text-muted: #65676B;
-  --color-border: #DADDE1;
-  --color-danger: #D93025;
+  /* ---------------------------------------------------------------------
+     BRAND / ACCENT
+     A single deep, desaturated harbor-teal. Used for: primary buttons,
+     active nav state, links, focus rings. Not used for backgrounds,
+     borders, or decoration — scarcity is the point.
+     Kin to foodcheck-public's ink navy (#1B2A4A), denser for a working tool.
+  --------------------------------------------------------------------- */
+  --color-primary: #2B5A6E;
+  --color-primary-hover: #1F4453;
+  --color-primary-soft: #E6EDEF; /* faint accent wash — active nav bg, selected row */
 
-  /* Fonts */
+  /* ---------------------------------------------------------------------
+     NEUTRALS
+     Warm, not blue-tinted — reads as paper/clinical rather than "app."
+  --------------------------------------------------------------------- */
+  --color-bg: #F5F3EF;
+  --color-card: #FFFFFF;
+  --color-text: #1B2333;
+  --color-text-muted: #6E6A61;
+  --color-border: #E1DDD3;
+  --color-border-strong: #C9C3B5;
+
+  /* ---------------------------------------------------------------------
+     STATUS — reserved vocabulary. Each color has exactly one job
+     anywhere in the app. Do not reuse for decoration, icons, or emphasis
+     outside these meanings.
+       danger  -> recalled / expired          (highest priority signal)
+       warning -> near-expiry                 (attention, not alarm)
+       success -> approved / confirmed        (quiet, not celebratory)
+  --------------------------------------------------------------------- */
+  --color-danger: #B3261E;
+  --color-danger-soft: #FBEAE9;
+  --color-warning: #B9862E;
+  --color-warning-soft: #FBF1DF;
+  --color-success: #3D7A5C;
+  --color-success-soft: #E9F2ED;
+
+  /* ---------------------------------------------------------------------
+     FONTS
+  --------------------------------------------------------------------- */
   --font-logo: "Playfair Display", serif;
   --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", "SF Mono", Consolas, monospace;
 
   --radius: 8px;
   --radius-lg: 16px;
+
+  --shadow-card: 0 1px 2px rgba(27, 35, 51, 0.06), 0 1px 8px rgba(27, 35, 51, 0.04);
 }
 
 * {
@@ -26,4 +58,19 @@ body {
   font-family: var(--font-body);
   color: var(--color-text);
   background: var(--color-bg);
+}
+
+/* Utility: use wherever numeric table data appears (dates, counts, batch
+   numbers, IDs) so digits align in columns instead of Inter's default
+   proportional figures. */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Utility: monospace strip for machine-readable identifiers
+   (batch numbers, public IDs) — echoes foodcheck-public's
+   "machine-readable zone" treatment. */
+.mono-id {
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
 }
