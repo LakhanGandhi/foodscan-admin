@@ -2,11 +2,17 @@ import { useEffect, useState } from "react";
 import { Plus, Pencil, X } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import { listBrands, createBrand, updateBrand } from "../api/brands";
+import "../styles/shared.css";
 
-const inputStyle = { width: "100%", padding: 8, marginTop: 4, marginBottom: 12 };
-const labelStyle = { fontSize: 13, fontWeight: 600 };
-const iconBtnStyle = { border: "none", background: "none", cursor: "pointer", color: "var(--color-primary)" };
 const STATUS_OPTIONS = ["active", "inactive"];
+
+function statusVariant(status) {
+  return status === "active" ? "success" : "neutral";
+}
+
+function StatusPill({ status }) {
+  return <span className={`status-pill status-pill--${statusVariant(status)}`}>{status}</span>;
+}
 
 function BrandsPage() {
   const { user } = useAuth();
@@ -95,52 +101,52 @@ function BrandsPage() {
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <h2 style={{ margin: 0 }}>Brands</h2>
         {canManage && (
-          <button onClick={() => setShowAddForm((v) => !v)} style={iconBtnStyle} title="Add Brand">
+          <button onClick={() => setShowAddForm((v) => !v)} className="icon-btn" title="Add Brand">
             <Plus size={22} />
           </button>
         )}
       </div>
 
       {loading && <p>Loading...</p>}
-      {error && <p style={{ color: "var(--color-danger)" }}>{error}</p>}
+      {error && <p className="alert-banner--danger">{error}</p>}
 
       {!loading && !error && (
-        <div style={{ maxHeight: 240, overflowY: "auto", border: "1px solid var(--color-border)", marginBottom: 24 }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ textAlign: "left", borderBottom: "1px solid var(--color-border)", position: "sticky", top: 0, background: "var(--color-card)" }}>
-              <th style={{ padding: 8 }}>ID</th>
-              <th style={{ padding: 8 }}>Brand Name</th>
-              <th style={{ padding: 8 }}>Company Name</th>
-              <th style={{ padding: 8 }}>Status</th>
-              <th style={{ padding: 8 }}></th>
-            </tr>
-          </thead>
-          <tbody>
-            {brands.map((b) => (
-              <tr key={b._id} style={{ borderBottom: "1px solid var(--color-border)" }}>
-                <td style={{ padding: 8, fontFamily: "monospace", fontSize: 12 }}>{b._id}</td>
-                <td style={{ padding: 8 }}>{b.brandName}</td>
-                <td style={{ padding: 8 }}>{b.companyName}</td>
-                <td style={{ padding: 8 }}>{b.status}</td>
-                <td style={{ padding: 8 }}>
-                  {canManage && (
-                    <button onClick={() => startEdit(b)} style={iconBtnStyle} title="Edit">
-                      <Pencil size={18} />
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-            {brands.length === 0 && (
+        <div className="table-wrapper">
+          <table className="data-table">
+            <thead>
               <tr>
-                <td colSpan={5} style={{ padding: 8, color: "var(--color-text-muted)" }}>
-                  No brands yet.
-                </td>
+                <th>ID</th>
+                <th>Brand Name</th>
+                <th>Company Name</th>
+                <th>Status</th>
+                <th></th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {brands.map((b) => (
+                <tr key={b._id}>
+                  <td className="id-cell">{b._id}</td>
+                  <td>{b.brandName}</td>
+                  <td>{b.companyName}</td>
+                  <td>
+                    <StatusPill status={b.status} />
+                  </td>
+                  <td>
+                    {canManage && (
+                      <button onClick={() => startEdit(b)} className="icon-btn" title="Edit">
+                        <Pencil size={18} />
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {brands.length === 0 && (
+                <tr className="empty-row">
+                  <td colSpan={5}>No brands yet.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       )}
 
@@ -150,20 +156,16 @@ function BrandsPage() {
           <form onSubmit={handleCreate} style={{ maxWidth: 400 }}>
             {user.role === "superAdmin" && (
               <>
-                <label style={labelStyle}>Company ID</label>
-                <input style={inputStyle} value={companyId} onChange={(e) => setCompanyId(e.target.value)} required />
+                <label className="field-label">Company ID</label>
+                <input className="field-input" value={companyId} onChange={(e) => setCompanyId(e.target.value)} required />
               </>
             )}
-            <label style={labelStyle}>Brand Name</label>
-            <input style={inputStyle} value={brandName} onChange={(e) => setBrandName(e.target.value)} required />
+            <label className="field-label">Brand Name</label>
+            <input className="field-input" value={brandName} onChange={(e) => setBrandName(e.target.value)} required />
 
-            {formError && <p style={{ color: "var(--color-danger)" }}>{formError}</p>}
+            {formError && <p className="alert-banner--danger">{formError}</p>}
             <div style={{ display: "flex", gap: 10 }}>
-              <button
-                type="submit"
-                disabled={submitting}
-                style={{ padding: "10px 20px", border: "none", borderRadius: 999, background: "var(--color-primary)", color: "#fff", cursor: "pointer" }}
-              >
+              <button type="submit" disabled={submitting} className="btn btn--primary">
                 {submitting ? "Creating..." : "Create Brand"}
               </button>
               <button
@@ -174,7 +176,7 @@ function BrandsPage() {
                   setFormError("");
                   setShowAddForm(false);
                 }}
-                style={{ padding: "10px 20px", border: "1px solid var(--color-border)", borderRadius: 999, background: "#fff", cursor: "pointer" }}
+                className="btn btn--neutral-outline"
               >
                 Cancel
               </button>
@@ -187,27 +189,23 @@ function BrandsPage() {
         <div style={{ marginTop: 32, borderTop: "1px solid var(--color-border)", paddingTop: 20, maxWidth: 400 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <h3 style={{ margin: 0 }}>Edit: {editingBrand.brandName}</h3>
-            <button onClick={cancelEdit} style={iconBtnStyle} title="Cancel">
+            <button onClick={cancelEdit} className="icon-btn" title="Cancel">
               <X size={20} />
             </button>
           </div>
           <form onSubmit={handleSaveEdit}>
-            <label style={labelStyle}>Brand Name</label>
-            <input style={inputStyle} value={editName} onChange={(e) => setEditName(e.target.value)} required />
-            <label style={labelStyle}>Status</label>
-            <select style={inputStyle} value={editStatus} onChange={(e) => setEditStatus(e.target.value)}>
+            <label className="field-label">Brand Name</label>
+            <input className="field-input" value={editName} onChange={(e) => setEditName(e.target.value)} required />
+            <label className="field-label">Status</label>
+            <select className="field-input" value={editStatus} onChange={(e) => setEditStatus(e.target.value)}>
               {STATUS_OPTIONS.map((s) => (
                 <option key={s} value={s}>
                   {s}
                 </option>
               ))}
             </select>
-            {editError && <p style={{ color: "var(--color-danger)" }}>{editError}</p>}
-            <button
-              type="submit"
-              disabled={editSubmitting}
-              style={{ padding: "10px 20px", border: "none", borderRadius: 999, background: "var(--color-primary)", color: "#fff", cursor: "pointer" }}
-            >
+            {editError && <p className="alert-banner--danger">{editError}</p>}
+            <button type="submit" disabled={editSubmitting} className="btn btn--primary">
               {editSubmitting ? "Saving..." : "Save Changes"}
             </button>
           </form>
