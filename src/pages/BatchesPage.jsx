@@ -1,21 +1,59 @@
 import { useEffect, useState } from "react";
-import { Plus, Pencil, QrCode, X } from "lucide-react";
+import { Plus, Pencil, QrCode, X, AlertTriangle } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import client from "../api/client";
 import { listBatches, createBatch, updateBatch } from "../api/batches";
+import "../styles/shared.css";
 
 const emptyForm = { companyId: "", productId: "", plantId: "", batchNumber: "", mfgDate: "", expDate: "" };
-const inputStyle = { width: "100%", padding: 8, marginTop: 4, marginBottom: 12 };
-const labelStyle = { fontSize: 13, fontWeight: 600 };
-const iconBtnStyle = { border: "none", background: "none", cursor: "pointer", color: "var(--color-primary)" };
+
+// Matches the 15-day near-expiry window the public batch endpoint uses
+// server-side, so admin sees the same urgency signal as a consumer would.
+// This is a client-side estimate for display only — the authoritative
+// expiryStatus is computed by the backend on the public endpoint.
+const NEAR_EXPIRY_WINDOW_DAYS = 15;
 
 function formatDate(d) {
   return d ? new Date(d).toLocaleDateString() : "";
 }
 
+function expiryInfo(expDate) {
+  if (!expDate) return { key: "unknown", label: "—" };
+  const daysLeft = Math.ceil((new Date(expDate) - new Date()) / (1000 * 60 * 60 * 24));
+  if (daysLeft < 0) return { key: "expired", label: "Expired" };
+  if (daysLeft <= NEAR_EXPIRY_WINDOW_DAYS) return { key: "near_expiry", label: `${daysLeft}d left` };
+  return { key: "safe", label: null };
+}
+
+function ExpiryPill({ expDate }) {
+  const info = expiryInfo(expDate);
+  if (info.key === "safe" || info.key === "unknown") {
+    return <span style={{ color: "var(--color-text-muted)", fontSize: 13 }}>{info.label || "—"}</span>;
+  }
+  const variant = info.key === "expired" ? "danger" : "warning";
+  return <span className={`status-pill status-pill--${variant}`}>{info.label}</span>;
+}
+
+// "active" gets no pill at all — plain text. "recalled" is the only status
+// in this whole app that gets a bold, icon-carrying pill, on purpose: if
+// nothing else here is colored, recalled is unmistakable the moment it
+// appears in the table.
+function BatchStatus({ status }) {
+  if (status === "recalled") {
+    return (
+      <span className="status-pill status-pill--danger" style={{ gap: 4 }}>
+        <AlertTriangle size={12} />
+        recalled
+      </span>
+    );
+  }
+  return <span style={{ color: "var(--color-text)" }}>{status}</span>;
+}
+
 function BatchesPage() {
   const { user } = useAuth();
   const canManage = ["superAdmin", "companyAdmin", "companyEmployee"].includes(user?.role);
+  const isAdmin = user?.role === "superAdmin" || user?.role === "companyAdmin";
 
   const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,6 +69,11 @@ function BatchesPage() {
   const [qrPublicUrl, setQrPublicUrl] = useState(null);
   const [qrBlob, setQrBlob] = useState(null);
   const [qrLoading, setQrLoading] = useState(false);
+
+  const [editingBatch, setEditingBatch] = useState(null);
+  const [editForm, setEditForm] = useState(null);
+  const [editSubmitting, setEditSubmitting] = useState(false);
+  const [editError, setEditError] = useState("");
 
   async function loadBatches() {
     setLoading(true);
@@ -70,12 +113,6 @@ function BatchesPage() {
       setSubmitting(false);
     }
   }
-
-  const isAdmin = user?.role === "superAdmin" || user?.role === "companyAdmin";
-  const [editingBatch, setEditingBatch] = useState(null);
-  const [editForm, setEditForm] = useState(null);
-  const [editSubmitting, setEditSubmitting] = useState(false);
-  const [editError, setEditError] = useState("");
 
   function startEdit(batch) {
     setEditingBatch(batch);
@@ -159,55 +196,57 @@ function BatchesPage() {
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <h2 style={{ margin: 0 }}>Batches</h2>
         {canManage && (
-          <button onClick={() => setShowAddForm((v) => !v)} style={iconBtnStyle} title="Add Batch">
+          <button onClick={() => setShowAddForm((v) => !v)} className="icon-btn" title="Add Batch">
             <Plus size={22} />
           </button>
         )}
       </div>
 
       {loading && <p>Loading...</p>}
-      {error && <p style={{ color: "var(--color-danger)" }}>{error}</p>}
+      {error && <p className="alert-banner--danger">{error}</p>}
 
       {!loading && !error && (
-        <div style={{ maxHeight: 240, overflowY: "auto", border: "1px solid var(--color-border)", marginBottom: 24 }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <div className="table-wrapper">
+          <table className="data-table">
             <thead>
-              <tr style={{ textAlign: "left", borderBottom: "1px solid var(--color-border)", position: "sticky", top: 0, background: "var(--color-card)" }}>
-                <th style={{ padding: 8 }}>ID</th>
-                <th style={{ padding: 8 }}>Product ID</th>
-                <th style={{ padding: 8 }}>Batch No.</th>
-                <th style={{ padding: 8 }}>Mfg Date</th>
-                <th style={{ padding: 8 }}>Exp Date</th>
-                <th style={{ padding: 8 }}>Status</th>
-                <th style={{ padding: 8 }}></th>
+              <tr>
+                <th>ID</th>
+                <th>Product ID</th>
+                <th>Batch No.</th>
+                <th>Mfg Date</th>
+                <th>Exp Date</th>
+                <th>Expiry</th>
+                <th>Status</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
               {batches.map((b) => (
-                <tr key={b._id} style={{ borderBottom: "1px solid var(--color-border)" }}>
-                  <td style={{ padding: 8, fontFamily: "monospace", fontSize: 12 }}>{b._id}</td>
-                  <td style={{ padding: 8, fontFamily: "monospace", fontSize: 12 }}>{b.productId}</td>
-                  <td style={{ padding: 8 }}>{b.batchNumber}</td>
-                  <td style={{ padding: 8 }}>{formatDate(b.mfgDate)}</td>
-                  <td style={{ padding: 8 }}>{formatDate(b.expDate)}</td>
-                  <td style={{ padding: 8 }}>{b.status}</td>
-                  <td style={{ padding: 8, display: "flex", gap: 8 }}>
+                <tr key={b._id}>
+                  <td className="id-cell">{b._id}</td>
+                  <td className="id-cell">{b.productId}</td>
+                  <td>{b.batchNumber}</td>
+                  <td className="tabular-nums">{formatDate(b.mfgDate)}</td>
+                  <td className="tabular-nums">{formatDate(b.expDate)}</td>
+                  <td>{b.status === "recalled" ? <span style={{ color: "var(--color-text-muted)" }}>—</span> : <ExpiryPill expDate={b.expDate} />}</td>
+                  <td>
+                    <BatchStatus status={b.status} />
+                  </td>
+                  <td style={{ display: "flex", gap: 8 }}>
                     {isAdmin && (
-                      <button onClick={() => startEdit(b)} style={iconBtnStyle} title="Edit">
+                      <button onClick={() => startEdit(b)} className="icon-btn" title="Edit">
                         <Pencil size={18} />
                       </button>
                     )}
-                    <button onClick={() => handleShowQr(b)} style={iconBtnStyle} title="Generate QR">
+                    <button onClick={() => handleShowQr(b)} className="icon-btn" title="Generate QR">
                       <QrCode size={18} />
                     </button>
                   </td>
                 </tr>
               ))}
               {batches.length === 0 && (
-                <tr>
-                  <td colSpan={7} style={{ padding: 8, color: "var(--color-text-muted)" }}>
-                    No batches yet.
-                  </td>
+                <tr className="empty-row">
+                  <td colSpan={8}>No batches yet.</td>
                 </tr>
               )}
             </tbody>
@@ -222,33 +261,29 @@ function BatchesPage() {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
               {user.role === "superAdmin" && (
                 <div>
-                  <label style={labelStyle}>Company ID</label>
-                  <input style={inputStyle} value={form.companyId} onChange={(e) => updateField("companyId", e.target.value)} required />
+                  <label className="field-label">Company ID</label>
+                  <input className="field-input" value={form.companyId} onChange={(e) => updateField("companyId", e.target.value)} required />
                 </div>
               )}
               {createFields.map(([key, label]) => (
                 <div key={key}>
-                  <label style={labelStyle}>{label}</label>
-                  <input style={inputStyle} value={form[key]} onChange={(e) => updateField(key, e.target.value)} required />
+                  <label className="field-label">{label}</label>
+                  <input className="field-input" value={form[key]} onChange={(e) => updateField(key, e.target.value)} required />
                 </div>
               ))}
               <div>
-                <label style={labelStyle}>Manufacturing Date</label>
-                <input style={inputStyle} type="date" value={form.mfgDate} onChange={(e) => updateField("mfgDate", e.target.value)} required />
+                <label className="field-label">Manufacturing Date</label>
+                <input className="field-input" type="date" value={form.mfgDate} onChange={(e) => updateField("mfgDate", e.target.value)} required />
               </div>
               <div>
-                <label style={labelStyle}>Expiry Date</label>
-                <input style={inputStyle} type="date" value={form.expDate} onChange={(e) => updateField("expDate", e.target.value)} required />
+                <label className="field-label">Expiry Date</label>
+                <input className="field-input" type="date" value={form.expDate} onChange={(e) => updateField("expDate", e.target.value)} required />
               </div>
             </div>
 
-            {formError && <p style={{ color: "var(--color-danger)" }}>{formError}</p>}
+            {formError && <p className="alert-banner--danger">{formError}</p>}
             <div style={{ display: "flex", gap: 10 }}>
-              <button
-                type="submit"
-                disabled={submitting}
-                style={{ padding: "10px 20px", border: "none", borderRadius: 999, background: "var(--color-primary)", color: "#fff", cursor: "pointer" }}
-              >
+              <button type="submit" disabled={submitting} className="btn btn--primary">
                 {submitting ? "Creating..." : "Create Batch"}
               </button>
               <button
@@ -258,7 +293,7 @@ function BatchesPage() {
                   setFormError("");
                   setShowAddForm(false);
                 }}
-                style={{ padding: "10px 20px", border: "1px solid var(--color-border)", borderRadius: 999, background: "#fff", cursor: "pointer" }}
+                className="btn btn--neutral-outline"
               >
                 Cancel
               </button>
@@ -271,36 +306,32 @@ function BatchesPage() {
         <div style={{ marginTop: 32, borderTop: "1px solid var(--color-border)", paddingTop: 20, maxWidth: 480, marginLeft: "auto", marginRight: "auto" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <h3 style={{ margin: 0 }}>Edit Batch: {editingBatch.batchNumber}</h3>
-            <button onClick={cancelEdit} style={iconBtnStyle} title="Cancel">
+            <button onClick={cancelEdit} className="icon-btn" title="Cancel">
               <X size={20} />
             </button>
           </div>
           <form onSubmit={handleSaveEdit}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
               <div>
-                <label style={labelStyle}>Batch Number</label>
+                <label className="field-label">Batch Number</label>
                 <input
-                  style={inputStyle}
+                  className="field-input"
                   value={editForm.batchNumber}
                   onChange={(e) => setEditForm((p) => ({ ...p, batchNumber: e.target.value }))}
                   required
                 />
               </div>
               <div>
-                <label style={labelStyle}>Status</label>
-                <select
-                  style={inputStyle}
-                  value={editForm.status}
-                  onChange={(e) => setEditForm((p) => ({ ...p, status: e.target.value }))}
-                >
+                <label className="field-label">Status</label>
+                <select className="field-input" value={editForm.status} onChange={(e) => setEditForm((p) => ({ ...p, status: e.target.value }))}>
                   <option value="active">active</option>
                   <option value="recalled">recalled</option>
                 </select>
               </div>
               <div>
-                <label style={labelStyle}>Manufacturing Date</label>
+                <label className="field-label">Manufacturing Date</label>
                 <input
-                  style={inputStyle}
+                  className="field-input"
                   type="date"
                   value={editForm.mfgDate}
                   onChange={(e) => setEditForm((p) => ({ ...p, mfgDate: e.target.value }))}
@@ -308,9 +339,9 @@ function BatchesPage() {
                 />
               </div>
               <div>
-                <label style={labelStyle}>Expiry Date</label>
+                <label className="field-label">Expiry Date</label>
                 <input
-                  style={inputStyle}
+                  className="field-input"
                   type="date"
                   value={editForm.expDate}
                   onChange={(e) => setEditForm((p) => ({ ...p, expDate: e.target.value }))}
@@ -318,12 +349,8 @@ function BatchesPage() {
                 />
               </div>
             </div>
-            {editError && <p style={{ color: "var(--color-danger)" }}>{editError}</p>}
-            <button
-              type="submit"
-              disabled={editSubmitting}
-              style={{ padding: "10px 20px", border: "none", borderRadius: 999, background: "var(--color-primary)", color: "#fff", cursor: "pointer" }}
-            >
+            {editError && <p className="alert-banner--danger">{editError}</p>}
+            <button type="submit" disabled={editSubmitting} className="btn btn--primary">
               {editSubmitting ? "Saving..." : "Save Changes"}
             </button>
           </form>
@@ -334,19 +361,19 @@ function BatchesPage() {
         <div style={{ marginTop: 32, borderTop: "1px solid var(--color-border)", paddingTop: 20, maxWidth: 400, marginLeft: "auto", marginRight: "auto" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <h3 style={{ margin: 0 }}>QR: {qrBatch.batchNumber}</h3>
-            <button onClick={closeQr} style={iconBtnStyle} title="Close">
+            <button onClick={closeQr} className="icon-btn" title="Close">
               <X size={20} />
             </button>
           </div>
           {qrLoading && <p>Generating...</p>}
           {qrImageUrl && (
             <>
-              <img src={qrImageUrl} alt="QR code" style={{ width: 200, height: 200, borderRadius: 4 }} />
+              <img src={qrImageUrl} alt="QR code" style={{ width: 200, height: 200, borderRadius: "var(--radius)", border: "1px solid var(--color-border)" }} />
               <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
-                <button onClick={downloadQr} style={{ padding: "8px 16px", border: "1px solid var(--color-border)", borderRadius: 999, background: "#fff", cursor: "pointer" }}>
+                <button onClick={downloadQr} className="btn btn--neutral-outline">
                   Download PNG
                 </button>
-                <button onClick={copyQrUrl} style={{ padding: "8px 16px", border: "1px solid var(--color-border)", borderRadius: 999, background: "#fff", cursor: "pointer" }}>
+                <button onClick={copyQrUrl} className="btn btn--neutral-outline">
                   Copy Public URL
                 </button>
               </div>

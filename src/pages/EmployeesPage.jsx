@@ -2,11 +2,17 @@ import { useEffect, useState } from "react";
 import { Plus, Power, KeyRound, X } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import { listUsers, createUser, changeUserStatus, resetUserPassword } from "../api/users";
+import "../styles/shared.css";
 
 const emptyForm = { name: "", email: "", password: "", role: "companyEmployee", companyId: "" };
-const inputStyle = { width: "100%", padding: 8, marginTop: 4, marginBottom: 12 };
-const labelStyle = { fontSize: 13, fontWeight: 600 };
-const iconBtnStyle = { border: "none", background: "none", cursor: "pointer", color: "var(--color-primary)" };
+
+function statusVariant(status) {
+  return status === "active" ? "success" : "neutral";
+}
+
+function StatusPill({ status }) {
+  return <span className={`status-pill status-pill--${statusVariant(status)}`}>{status}</span>;
+}
 
 function EmployeesPage() {
   const { user } = useAuth();
@@ -107,50 +113,50 @@ function EmployeesPage() {
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <h2 style={{ margin: 0 }}>Employees</h2>
-        <button onClick={() => setShowAddForm((v) => !v)} style={iconBtnStyle} title="Add User">
+        <button onClick={() => setShowAddForm((v) => !v)} className="icon-btn" title="Add User">
           <Plus size={22} />
         </button>
       </div>
 
       {loading && <p>Loading...</p>}
-      {error && <p style={{ color: "var(--color-danger)" }}>{error}</p>}
+      {error && <p className="alert-banner--danger">{error}</p>}
 
       {!loading && !error && (
-        <div style={{ maxHeight: 240, overflowY: "auto", border: "1px solid var(--color-border)", marginBottom: 24 }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <div className="table-wrapper">
+          <table className="data-table">
             <thead>
-              <tr style={{ textAlign: "left", borderBottom: "1px solid var(--color-border)", position: "sticky", top: 0, background: "var(--color-card)" }}>
-                <th style={{ padding: 8 }}>ID</th>
-                <th style={{ padding: 8 }}>Name</th>
-                <th style={{ padding: 8 }}>Email</th>
-                <th style={{ padding: 8 }}>Role</th>
-                <th style={{ padding: 8 }}>Status</th>
-                <th style={{ padding: 8 }}></th>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
               {users.map((u) => (
-                <tr key={u.id} style={{ borderBottom: "1px solid var(--color-border)" }}>
-                  <td style={{ padding: 8, fontFamily: "monospace", fontSize: 12 }}>{u.id}</td>
-                  <td style={{ padding: 8 }}>{u.name}</td>
-                  <td style={{ padding: 8 }}>{u.email}</td>
-                  <td style={{ padding: 8 }}>{u.role}</td>
-                  <td style={{ padding: 8 }}>{u.status}</td>
-                  <td style={{ padding: 8, display: "flex", gap: 8 }}>
-                    <button onClick={() => handleToggleStatus(u)} style={iconBtnStyle} title={u.status === "active" ? "Disable" : "Enable"}>
+                <tr key={u.id}>
+                  <td className="id-cell">{u.id}</td>
+                  <td>{u.name}</td>
+                  <td>{u.email}</td>
+                  <td>{u.role}</td>
+                  <td>
+                    <StatusPill status={u.status} />
+                  </td>
+                  <td style={{ display: "flex", gap: 8 }}>
+                    <button onClick={() => handleToggleStatus(u)} className="icon-btn" title={u.status === "active" ? "Disable" : "Enable"}>
                       <Power size={18} />
                     </button>
-                    <button onClick={() => startReset(u)} style={iconBtnStyle} title="Reset Password">
+                    <button onClick={() => startReset(u)} className="icon-btn" title="Reset Password">
                       <KeyRound size={18} />
                     </button>
                   </td>
                 </tr>
               ))}
               {users.length === 0 && (
-                <tr>
-                  <td colSpan={6} style={{ padding: 8, color: "var(--color-text-muted)" }}>
-                    No employees yet.
-                  </td>
+                <tr className="empty-row">
+                  <td colSpan={6}>No employees yet.</td>
                 </tr>
               )}
             </tbody>
@@ -164,41 +170,37 @@ function EmployeesPage() {
           <form onSubmit={handleCreate} style={{ maxWidth: 700, margin: "0 auto" }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
               <div>
-                <label style={labelStyle}>Name</label>
-                <input style={inputStyle} value={form.name} onChange={(e) => updateField("name", e.target.value)} required />
+                <label className="field-label">Name</label>
+                <input className="field-input" value={form.name} onChange={(e) => updateField("name", e.target.value)} required />
               </div>
               <div>
-                <label style={labelStyle}>Email</label>
-                <input style={inputStyle} type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)} required />
+                <label className="field-label">Email</label>
+                <input className="field-input" type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)} required />
               </div>
               <div>
-                <label style={labelStyle}>Password</label>
-                <input style={inputStyle} type="text" value={form.password} onChange={(e) => updateField("password", e.target.value)} required />
+                <label className="field-label">Password</label>
+                <input className="field-input" type="text" value={form.password} onChange={(e) => updateField("password", e.target.value)} required />
               </div>
               {isSuperAdmin && (
                 <>
                   <div>
-                    <label style={labelStyle}>Role</label>
-                    <select style={inputStyle} value={form.role} onChange={(e) => updateField("role", e.target.value)}>
+                    <label className="field-label">Role</label>
+                    <select className="field-input" value={form.role} onChange={(e) => updateField("role", e.target.value)}>
                       <option value="companyEmployee">companyEmployee</option>
                       <option value="companyAdmin">companyAdmin</option>
                     </select>
                   </div>
                   <div>
-                    <label style={labelStyle}>Company ID</label>
-                    <input style={inputStyle} value={form.companyId} onChange={(e) => updateField("companyId", e.target.value)} required />
+                    <label className="field-label">Company ID</label>
+                    <input className="field-input" value={form.companyId} onChange={(e) => updateField("companyId", e.target.value)} required />
                   </div>
                 </>
               )}
             </div>
 
-            {formError && <p style={{ color: "var(--color-danger)" }}>{formError}</p>}
+            {formError && <p className="alert-banner--danger">{formError}</p>}
             <div style={{ display: "flex", gap: 10 }}>
-              <button
-                type="submit"
-                disabled={submitting}
-                style={{ padding: "10px 20px", border: "none", borderRadius: 999, background: "var(--color-primary)", color: "#fff", cursor: "pointer" }}
-              >
+              <button type="submit" disabled={submitting} className="btn btn--primary">
                 {submitting ? "Creating..." : "Create User"}
               </button>
               <button
@@ -208,7 +210,7 @@ function EmployeesPage() {
                   setFormError("");
                   setShowAddForm(false);
                 }}
-                style={{ padding: "10px 20px", border: "1px solid var(--color-border)", borderRadius: 999, background: "#fff", cursor: "pointer" }}
+                className="btn btn--neutral-outline"
               >
                 Cancel
               </button>
@@ -221,20 +223,16 @@ function EmployeesPage() {
         <div style={{ marginTop: 32, borderTop: "1px solid var(--color-border)", paddingTop: 20, maxWidth: 400 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <h3 style={{ margin: 0 }}>Reset Password: {resettingUser.name}</h3>
-            <button onClick={cancelReset} style={iconBtnStyle} title="Close">
+            <button onClick={cancelReset} className="icon-btn" title="Close">
               <X size={20} />
             </button>
           </div>
           <form onSubmit={handleResetPassword}>
-            <label style={labelStyle}>New Password</label>
-            <input style={inputStyle} type="text" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={8} />
-            {resetError && <p style={{ color: "var(--color-danger)" }}>{resetError}</p>}
-            {resetSuccess && <p style={{ color: "var(--color-primary)" }}>{resetSuccess}</p>}
-            <button
-              type="submit"
-              disabled={resetSubmitting}
-              style={{ padding: "10px 20px", border: "none", borderRadius: 999, background: "var(--color-primary)", color: "#fff", cursor: "pointer" }}
-            >
+            <label className="field-label">New Password</label>
+            <input className="field-input" type="text" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={8} />
+            {resetError && <p className="alert-banner--danger">{resetError}</p>}
+            {resetSuccess && <p className="alert-banner--success">{resetSuccess}</p>}
+            <button type="submit" disabled={resetSubmitting} className="btn btn--primary">
               {resetSubmitting ? "Resetting..." : "Reset Password"}
             </button>
           </form>
